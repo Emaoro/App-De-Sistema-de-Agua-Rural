@@ -9,12 +9,14 @@ const usuarioFields = document.getElementById('usuarioFields');
 
 const textoBienvenida = document.getElementById('textoBienvenida');
 
-/*
-    API_BASE:
-    - Si abres con Live Server 127.0.0.1:5500, conecta al backend localhost:3000.
-    - Si abres con localhost:3000, usa el mismo dominio.
-    - Si abres en Render, usa el dominio de Render.
-*/
+// =====================================================
+// CONFIGURACIÓN DE API
+// =====================================================
+// Si abres con Live Server en 127.0.0.1:5500,
+// conecta al backend local en localhost:3000.
+// Si abres desde localhost:3000 o Render,
+// usa el mismo dominio donde está abierta la app.
+
 let API_BASE = window.location.origin;
 
 if (
@@ -28,21 +30,31 @@ let tipoLogin = 'admin';
 
 console.log('API conectada en:', API_BASE);
 
-// ======================================
+// =====================================================
 // CAMBIAR A LOGIN ADMINISTRADOR
-// ======================================
+// =====================================================
 
 if (tabAdmin) {
     tabAdmin.addEventListener('click', () => {
         tipoLogin = 'admin';
 
         tabAdmin.classList.add('active');
-        tabUsuario.classList.remove('active');
 
-        adminFields.classList.remove('hidden');
-        usuarioFields.classList.add('hidden');
+        if (tabUsuario) {
+            tabUsuario.classList.remove('active');
+        }
 
-        btnLogin.textContent = 'LOG IN';
+        if (adminFields) {
+            adminFields.classList.remove('hidden');
+        }
+
+        if (usuarioFields) {
+            usuarioFields.classList.add('hidden');
+        }
+
+        if (btnLogin) {
+            btnLogin.textContent = 'LOG IN';
+        }
 
         if (textoBienvenida) {
             textoBienvenida.textContent = 'Ingrese sus datos para acceder al sistema';
@@ -50,21 +62,31 @@ if (tabAdmin) {
     });
 }
 
-// ======================================
-// CAMBIAR A LOGIN USUARIO
-// ======================================
+// =====================================================
+// CAMBIAR A LOGIN USUARIO DE LA COMUNIDAD
+// =====================================================
 
 if (tabUsuario) {
     tabUsuario.addEventListener('click', () => {
         tipoLogin = 'usuario';
 
         tabUsuario.classList.add('active');
-        tabAdmin.classList.remove('active');
 
-        usuarioFields.classList.remove('hidden');
-        adminFields.classList.add('hidden');
+        if (tabAdmin) {
+            tabAdmin.classList.remove('active');
+        }
 
-        btnLogin.textContent = 'INGRESAR';
+        if (usuarioFields) {
+            usuarioFields.classList.remove('hidden');
+        }
+
+        if (adminFields) {
+            adminFields.classList.add('hidden');
+        }
+
+        if (btnLogin) {
+            btnLogin.textContent = 'INGRESAR';
+        }
 
         if (textoBienvenida) {
             textoBienvenida.textContent = 'Acceso de usuario de la comunidad';
@@ -72,9 +94,9 @@ if (tabUsuario) {
     });
 }
 
-// ======================================
+// =====================================================
 // FORMULARIO PRINCIPAL
-// ======================================
+// =====================================================
 
 if (formLogin) {
     formLogin.addEventListener('submit', async (event) => {
@@ -88,9 +110,9 @@ if (formLogin) {
     });
 }
 
-// ======================================
+// =====================================================
 // LOGIN ADMINISTRADOR
-// ======================================
+// =====================================================
 
 async function loginAdministrador() {
     const inputUsuario = document.getElementById('usuario');
@@ -105,8 +127,7 @@ async function loginAdministrador() {
     }
 
     try {
-        btnLogin.disabled = true;
-        btnLogin.textContent = 'Ingresando...';
+        activarBoton('Ingresando...');
 
         const respuesta = await fetch(`${API_BASE}/api/auth/login`, {
             method: 'POST',
@@ -119,26 +140,18 @@ async function loginAdministrador() {
             })
         });
 
-        const texto = await respuesta.text();
-
-        let data;
-
-        try {
-            data = JSON.parse(texto);
-        } catch (error) {
-            console.error('Respuesta no JSON:', texto);
-            alert('El servidor no respondió correctamente.');
-            return;
-        }
+        const data = await obtenerJSONSeguro(respuesta);
 
         if (!respuesta.ok) {
             alert(data.mensaje || 'No se pudo iniciar sesión');
             return;
         }
 
+        limpiarSesion();
+
         localStorage.setItem('token', data.token || '');
         localStorage.setItem('usuario', data.usuario || usuario);
-        localStorage.setItem('nombre', data.nombre || data.nombre_completo || '');
+        localStorage.setItem('nombre', data.nombre || data.nombre_completo || 'Administrador');
         localStorage.setItem('correo', data.correo || '');
         localStorage.setItem('rol', data.rol || 'admin');
 
@@ -150,14 +163,13 @@ async function loginAdministrador() {
         console.error('Error en login administrador:', error);
         alert('Error al conectar con el servidor');
     } finally {
-        btnLogin.disabled = false;
-        btnLogin.textContent = 'LOG IN';
+        restaurarBotonAdmin();
     }
 }
 
-// ======================================
-// LOGIN USUARIO INVITADO
-// ======================================
+// =====================================================
+// LOGIN USUARIO INVITADO / USUARIO COMUNIDAD
+// =====================================================
 
 async function loginUsuarioInvitado() {
     const inputCorreo = document.getElementById('correoInvitado');
@@ -168,11 +180,13 @@ async function loginUsuarioInvitado() {
         return;
     }
 
-    try {
-        btnLogin.disabled = true;
-        btnLogin.textContent = 'Validando...';
+    if (!validarCorreo(correo)) {
+        alert('Ingrese un correo electrónico válido');
+        return;
+    }
 
-        console.log('Enviando correo a:', `${API_BASE}/api/usuario-invitado/login`);
+    try {
+        activarBoton('Validando...');
 
         const respuesta = await fetch(`${API_BASE}/api/usuario-invitado/login`, {
             method: 'POST',
@@ -184,23 +198,16 @@ async function loginUsuarioInvitado() {
             })
         });
 
-        const texto = await respuesta.text();
-
-        let data;
-
-        try {
-            data = JSON.parse(texto);
-        } catch (error) {
-            console.error('Respuesta no JSON:', texto);
-            alert('El servidor no respondió correctamente.');
-            return;
-        }
+        const data = await obtenerJSONSeguro(respuesta);
 
         if (!respuesta.ok) {
             alert(data.mensaje || 'Usuario no encontrado');
             return;
         }
 
+        limpiarSesion();
+
+        localStorage.setItem('familia_id', data.id || '');
         localStorage.setItem('token', data.token || '');
         localStorage.setItem('usuario', data.usuario || '');
         localStorage.setItem('nombre', data.nombre || 'Usuario invitado');
@@ -222,7 +229,75 @@ async function loginUsuarioInvitado() {
         console.error('Error en login de usuario invitado:', error);
         alert('Error al conectar con el servidor');
     } finally {
-        btnLogin.disabled = false;
+        restaurarBotonUsuario();
+    }
+}
+
+// =====================================================
+// FUNCIONES AUXILIARES
+// =====================================================
+
+function activarBoton(texto) {
+    if (!btnLogin) return;
+
+    btnLogin.disabled = true;
+    btnLogin.textContent = texto;
+}
+
+function restaurarBotonAdmin() {
+    if (!btnLogin) return;
+
+    btnLogin.disabled = false;
+
+    if (tipoLogin === 'admin') {
+        btnLogin.textContent = 'LOG IN';
+    } else {
         btnLogin.textContent = 'INGRESAR';
+    }
+}
+
+function restaurarBotonUsuario() {
+    if (!btnLogin) return;
+
+    btnLogin.disabled = false;
+
+    if (tipoLogin === 'usuario') {
+        btnLogin.textContent = 'INGRESAR';
+    } else {
+        btnLogin.textContent = 'LOG IN';
+    }
+}
+
+function limpiarSesion() {
+    localStorage.removeItem('familia_id');
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    localStorage.removeItem('nombre');
+    localStorage.removeItem('correo');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('dpi');
+    localStorage.removeItem('telefono');
+    localStorage.removeItem('direccion');
+    localStorage.removeItem('sector');
+    localStorage.removeItem('estado');
+    localStorage.removeItem('fecha_registro');
+}
+
+function validarCorreo(correo) {
+    const expresion = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return expresion.test(correo);
+}
+
+async function obtenerJSONSeguro(respuesta) {
+    const texto = await respuesta.text();
+
+    try {
+        return JSON.parse(texto);
+    } catch (error) {
+        console.error('Respuesta no JSON:', texto);
+
+        return {
+            mensaje: 'El servidor no respondió correctamente'
+        };
     }
 }
