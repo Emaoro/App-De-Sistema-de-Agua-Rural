@@ -120,7 +120,6 @@ router.post('/login', async (req, res) => {
         }
 
         const familia = resultado.rows[0];
-
         const estado = normalizar(familia.estado);
 
         if (estado !== 'activa' && estado !== 'activo') {
@@ -329,6 +328,11 @@ router.get('/dashboard', async (req, res) => {
                 condiciones.push(`LOWER(nombre_reportante::text) = LOWER($${params.length})`);
             }
 
+            if (columnasIncidencias.includes('responsable')) {
+                params.push(nombreUsuario);
+                condiciones.push(`LOWER(responsable::text) = LOWER($${params.length})`);
+            }
+
             if (columnasIncidencias.includes('correo')) {
                 params.push(correoNormalizado);
                 condiciones.push(`LOWER(correo::text) = LOWER($${params.length})`);
@@ -448,8 +452,6 @@ router.get('/dashboard', async (req, res) => {
 // =====================================================
 // REGISTRAR INCIDENCIA DESDE USUARIO
 // =====================================================
-// Esta ruta se adapta a tu tabla real de incidencias.
-// También evita fallos por columnas obligatorias.
 
 router.post('/incidencias', async (req, res) => {
     try {
@@ -491,36 +493,48 @@ router.post('/incidencias', async (req, res) => {
             }
         }
 
+        const nombreReportante = reportado_por || 'Usuario comunidad';
+        const sectorFinal = sector || 'Sin sector';
+        const correoFinal = correo || '';
+        const tipoFinal = tipo || 'Incidencia';
+        const estadoFinal = estado || 'Pendiente';
+        const fechaFinal = formatearFechaSQL(fecha_reporte);
+
         // =====================================================
         // DATOS PRINCIPALES
         // =====================================================
 
-        agregarSiExiste('tipo', tipo || 'Incidencia');
-        agregarSiExiste('tipo_incidencia', tipo || 'Incidencia');
-        agregarSiExiste('categoria', tipo || 'Incidencia');
+        agregarSiExiste('tipo', tipoFinal);
+        agregarSiExiste('tipo_incidencia', tipoFinal);
+        agregarSiExiste('categoria', tipoFinal);
 
         agregarSiExiste('descripcion', descripcion);
         agregarSiExiste('detalle', descripcion);
         agregarSiExiste('observaciones', descripcion);
         agregarSiExiste('comentario', descripcion);
 
-        agregarSiExiste('sector', sector || 'Sin sector');
-        agregarSiExiste('nombre_sector', sector || 'Sin sector');
+        agregarSiExiste('sector', sectorFinal);
+        agregarSiExiste('nombre_sector', sectorFinal);
 
-        agregarSiExiste('estado', estado || 'Pendiente');
+        agregarSiExiste('estado', estadoFinal);
 
-        agregarSiExiste('reportado_por', reportado_por || 'Usuario');
-        agregarSiExiste('nombre_reportante', reportado_por || 'Usuario');
-        agregarSiExiste('usuario_reporta', reportado_por || 'Usuario');
+        // Nombre del usuario que reporta
+        agregarSiExiste('reportado_por', nombreReportante);
+        agregarSiExiste('nombre_reportante', nombreReportante);
+        agregarSiExiste('usuario_reporta', nombreReportante);
 
-        agregarSiExiste('correo', correo || '');
-        agregarSiExiste('correo_reportante', correo || '');
+        // Responsable visible en el módulo de administrador
+        agregarSiExiste('responsable', nombreReportante);
+        agregarSiExiste('encargado', nombreReportante);
+        agregarSiExiste('asignado_a', nombreReportante);
+
+        // Correo del usuario
+        agregarSiExiste('correo', correoFinal);
+        agregarSiExiste('correo_reportante', correoFinal);
 
         // =====================================================
         // FECHAS
         // =====================================================
-
-        const fechaFinal = formatearFechaSQL(fecha_reporte);
 
         agregarSiExiste('fecha_reporte', fechaFinal);
         agregarSiExiste('fecha_registro', fechaFinal);
@@ -559,7 +573,56 @@ router.post('/incidencias', async (req, res) => {
                 return;
             }
 
-            let valorDefecto = 'N/A';
+            let valorDefecto = 'Pendiente de asignar';
+
+            // Campos de responsable deben llevar el nombre del usuario
+            if (
+                nombre === 'responsable' ||
+                nombre === 'encargado' ||
+                nombre === 'asignado_a' ||
+                nombre === 'reportado_por' ||
+                nombre === 'nombre_reportante' ||
+                nombre === 'usuario_reporta'
+            ) {
+                valorDefecto = nombreReportante;
+            }
+
+            if (
+                nombre === 'sector' ||
+                nombre === 'nombre_sector'
+            ) {
+                valorDefecto = sectorFinal;
+            }
+
+            if (
+                nombre === 'tipo' ||
+                nombre === 'tipo_incidencia' ||
+                nombre === 'categoria'
+            ) {
+                valorDefecto = tipoFinal;
+            }
+
+            if (
+                nombre === 'descripcion' ||
+                nombre === 'detalle' ||
+                nombre === 'observaciones' ||
+                nombre === 'comentario'
+            ) {
+                valorDefecto = descripcion;
+            }
+
+            if (
+                nombre === 'estado'
+            ) {
+                valorDefecto = estadoFinal;
+            }
+
+            if (
+                nombre === 'correo' ||
+                nombre === 'correo_reportante'
+            ) {
+                valorDefecto = correoFinal;
+            }
 
             if (
                 tipoDato.includes('integer') ||
@@ -574,7 +637,7 @@ router.post('/incidencias', async (req, res) => {
                 tipoDato.includes('date') ||
                 tipoDato.includes('timestamp')
             ) {
-                valorDefecto = new Date();
+                valorDefecto = fechaFinal;
             }
 
             if (tipoDato.includes('boolean')) {
@@ -602,7 +665,6 @@ router.post('/incidencias', async (req, res) => {
         console.log('REGISTRANDO INCIDENCIA DESDE USUARIO');
         console.log('Campos:', campos);
         console.log('Valores:', params);
-        console.log('SQL:', sql);
         console.log('==============================');
 
         const resultado = await pool.query(sql, params);
