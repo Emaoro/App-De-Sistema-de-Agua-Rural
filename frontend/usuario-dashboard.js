@@ -10,15 +10,15 @@ if (
 document.addEventListener('DOMContentLoaded', () => {
     validarSesionUsuario();
     colocarFechaActual();
-    cargarDatosUsuarioDesdeLocalStorage();
+    cargarDatosIniciales();
     activarNavegacion();
-    configurarFormularioIncidencia();
     configurarCerrarSesion();
+    configurarFormularioIncidencia();
     cargarDashboardUsuario();
 });
 
 // ===============================
-// VALIDAR SESIÓN
+// SESIÓN
 // ===============================
 
 function validarSesionUsuario() {
@@ -32,7 +32,7 @@ function validarSesionUsuario() {
 }
 
 // ===============================
-// FECHA
+// FECHA ACTUAL
 // ===============================
 
 function colocarFechaActual() {
@@ -50,26 +50,22 @@ function colocarFechaActual() {
 }
 
 // ===============================
-// DATOS TEMPORALES DEL LOGIN
+// DATOS INICIALES
 // ===============================
 
-function cargarDatosUsuarioDesdeLocalStorage() {
-    const nombre = localStorage.getItem('nombre') || 'Usuario invitado';
-    const correo = localStorage.getItem('correo') || '';
-    const dpi = localStorage.getItem('dpi') || 'No registrado';
-    const telefono = localStorage.getItem('telefono') || 'No registrado';
-    const direccion = localStorage.getItem('direccion') || 'No registrada';
-    const sector = localStorage.getItem('sector') || 'Sin sector';
+function cargarDatosIniciales() {
+    const familia = {
+        nombre_jefe: localStorage.getItem('nombre') || 'Usuario invitado',
+        correo: localStorage.getItem('correo') || '',
+        dpi: localStorage.getItem('dpi') || 'No registrado',
+        telefono: localStorage.getItem('telefono') || 'No registrado',
+        direccion: localStorage.getItem('direccion') || 'No registrada',
+        sector: localStorage.getItem('sector') || 'Sin sector',
+        estado: localStorage.getItem('estado') || 'Activo',
+        fecha_registro: localStorage.getItem('fecha_registro') || ''
+    };
 
-    pintarDatosFamilia({
-        nombre_jefe: nombre,
-        correo,
-        dpi,
-        telefono,
-        direccion,
-        sector,
-        estado: localStorage.getItem('estado') || 'Activo'
-    });
+    pintarFamilia(familia);
 }
 
 // ===============================
@@ -98,29 +94,28 @@ async function cargarDashboardUsuario() {
         }
 
         if (!respuesta.ok) {
-            console.warn(data.mensaje || 'No se pudo cargar dashboard del usuario');
+            console.warn(data.mensaje || 'No se pudo cargar el dashboard de usuario');
             return;
         }
 
-        if (data.familia) {
-            pintarDatosFamilia(data.familia);
-        }
-
+        pintarFamilia(data.familia);
         pintarTanque(data.tanque);
         pintarReportes(data.resumen_reportes);
         pintarDistribuciones(data.distribuciones || []);
         pintarIncidencias(data.incidencias || []);
 
     } catch (error) {
-        console.error('Error cargando dashboard de usuario:', error);
+        console.error('Error cargando dashboard usuario:', error);
     }
 }
 
 // ===============================
-// PINTAR DATOS DE FAMILIA
+// PINTAR FAMILIA
 // ===============================
 
-function pintarDatosFamilia(familia) {
+function pintarFamilia(familia) {
+    if (!familia) return;
+
     const nombre = familia.nombre_jefe || familia.nombre || 'Usuario invitado';
     const correo = familia.correo || '';
     const dpi = familia.dpi || 'No registrado';
@@ -128,6 +123,7 @@ function pintarDatosFamilia(familia) {
     const direccion = familia.direccion || 'No registrada';
     const sector = familia.sector || 'Sin sector';
     const estado = familia.estado || 'Activo';
+    const fechaRegistro = familia.fecha_registro || '';
 
     localStorage.setItem('nombre', nombre);
     localStorage.setItem('correo', correo);
@@ -136,52 +132,27 @@ function pintarDatosFamilia(familia) {
     localStorage.setItem('direccion', direccion);
     localStorage.setItem('sector', sector);
     localStorage.setItem('estado', estado);
+    localStorage.setItem('fecha_registro', fechaRegistro);
 
-    const nombreBienvenida = document.getElementById('nombreBienvenida');
-    const sectorBienvenida = document.getElementById('sectorBienvenida');
-    const perfilNombre = document.getElementById('perfilNombre');
+    setText('nombreBienvenida', nombre);
+    setText('sectorBienvenida', sector);
+    setText('perfilNombre', nombre);
+    setText('estadoServicioUsuario', estado || 'Activo');
+    setText('perfilEstado', estado || 'Activo');
+    setText('perfilFecha', fechaRegistro ? formatearFecha(fechaRegistro) : 'Sin fecha');
 
-    const infoNombre = document.getElementById('infoNombre');
-    const infoDpi = document.getElementById('infoDpi');
-    const infoTelefono = document.getElementById('infoTelefono');
-    const infoCorreo = document.getElementById('infoCorreo');
-    const infoSector = document.getElementById('infoSector');
-    const infoDireccion = document.getElementById('infoDireccion');
+    setValue('infoNombre', nombre);
+    setValue('infoDpi', dpi);
+    setValue('infoTelefono', telefono);
+    setValue('infoCorreo', correo);
+    setValue('infoSector', sector);
+    setValue('infoDireccion', direccion);
+    setValue('infoEstado', estado);
 
-    const incNombre = document.getElementById('incNombre');
-    const incSector = document.getElementById('incSector');
+    setValue('incNombre', nombre);
 
-    if (nombreBienvenida) nombreBienvenida.textContent = nombre;
-    if (sectorBienvenida) sectorBienvenida.textContent = sector;
-    if (perfilNombre) perfilNombre.textContent = nombre;
-
-    if (infoNombre) infoNombre.value = nombre;
-    if (infoDpi) infoDpi.value = dpi;
-    if (infoTelefono) infoTelefono.value = telefono;
-    if (infoCorreo) infoCorreo.value = correo;
-    if (infoSector) infoSector.value = sector;
-    if (infoDireccion) infoDireccion.value = direccion;
-
-    if (incNombre) incNombre.value = nombre;
-
-    if (incSector) {
-        let encontrado = false;
-
-        Array.from(incSector.options).forEach(option => {
-            if (normalizar(option.value) === normalizar(sector)) {
-                option.selected = true;
-                encontrado = true;
-            }
-        });
-
-        if (!encontrado && sector) {
-            const option = document.createElement('option');
-            option.value = sector;
-            option.textContent = sector;
-            option.selected = true;
-            incSector.appendChild(option);
-        }
-    }
+    cargarSectorEnSelect('sectorFiltro', sector);
+    cargarSectorEnSelect('incSector', sector);
 
     const fechaIncidencia = document.getElementById('incFecha');
 
@@ -192,79 +163,121 @@ function pintarDatosFamilia(familia) {
     }
 }
 
+function cargarSectorEnSelect(id, sector) {
+    const select = document.getElementById(id);
+
+    if (!select) return;
+
+    select.innerHTML = `
+        <option value="${escapeHTML(sector)}">${escapeHTML(sector)}</option>
+    `;
+}
+
 // ===============================
-// TANQUE REAL
+// TANQUE
 // ===============================
 
 function pintarTanque(tanque) {
     const tankFill = document.getElementById('tankFill');
     const tankPercent = document.getElementById('tankPercent');
+    const tankDetalle = document.getElementById('tankDetalle');
 
     if (!tanque) {
-        if (tankPercent) tankPercent.textContent = 'Sin dato';
         if (tankFill) tankFill.style.height = '0%';
+        if (tankPercent) tankPercent.textContent = 'Sin dato';
+        if (tankDetalle) tankDetalle.textContent = 'Sin lectura registrada';
         return;
     }
 
-    const porcentaje =
-        tanque.porcentaje ||
-        tanque.nivel_porcentaje ||
-        tanque.nivel ||
-        tanque.nivel_actual ||
-        0;
+    const porcentaje = obtenerValor(tanque, [
+        'porcentaje',
+        'nivel_porcentaje',
+        'nivel',
+        'nivel_actual'
+    ]);
+
+    const capacidad = obtenerValor(tanque, [
+        'capacidad',
+        'capacidad_total',
+        'litros_totales'
+    ]);
+
+    const litros = obtenerValor(tanque, [
+        'litros',
+        'litros_actuales',
+        'cantidad_litros'
+    ]);
 
     const porcentajeNumero = Math.max(0, Math.min(100, Number(porcentaje) || 0));
 
-    if (tankPercent) {
-        tankPercent.textContent = `${porcentajeNumero}%`;
-    }
+    if (tankFill) tankFill.style.height = `${porcentajeNumero}%`;
+    if (tankPercent) tankPercent.textContent = `${porcentajeNumero}%`;
 
-    if (tankFill) {
-        tankFill.style.height = `${porcentajeNumero}%`;
+    if (tankDetalle) {
+        if (litros && capacidad) {
+            tankDetalle.textContent = `${litros} L de ${capacidad} L`;
+        } else {
+            tankDetalle.textContent = 'Última lectura registrada';
+        }
     }
 }
 
 // ===============================
-// REPORTES REALES
+// REPORTES
 // ===============================
 
 function pintarReportes(resumen) {
-    if (!resumen) return;
+    const total = resumen?.total || 0;
+    const pendientes = resumen?.pendientes || 0;
+    const resueltos = resumen?.resueltos || 0;
 
-    const enviados = document.getElementById('reportesEnviados');
-    const pendientes = document.getElementById('reportesPendientes');
-    const resueltos = document.getElementById('reportesResueltos');
+    setText('reportesEnviados', total);
+    setText('reportesPendientes', pendientes);
+    setText('reportesResueltos', resueltos);
 
-    if (enviados) enviados.textContent = resumen.total || 0;
-    if (pendientes) pendientes.textContent = resumen.pendientes || 0;
-    if (resueltos) resueltos.textContent = resumen.resueltos || 0;
-
-    const totalReportesUsuario = document.getElementById('totalReportesUsuario');
-
-    if (totalReportesUsuario) {
-        totalReportesUsuario.textContent = resumen.total || 0;
-    }
+    setText('totalReportesUsuario', total);
+    setText('totalPendientesUsuario', pendientes);
+    setText('totalResueltosUsuario', resueltos);
 }
 
 // ===============================
-// DISTRIBUCIONES REALES
+// DISTRIBUCIONES
 // ===============================
 
 function pintarDistribuciones(distribuciones) {
-    pintarTablaDistribucion(distribuciones);
-    pintarHistorialDistribucion(distribuciones);
+    pintarResumenDistribucionInicio(distribuciones);
+    pintarTablaDistribuciones(distribuciones);
+    pintarHistorial(distribuciones);
     pintarProximaDistribucion(distribuciones);
+    pintarResumenHistorial(distribuciones);
 }
 
-function pintarTablaDistribucion(distribuciones) {
-    const tbody = document.querySelector('#section-distribucion tbody');
+function pintarResumenDistribucionInicio(distribuciones) {
+    const contenedor = document.getElementById('resumenDistribucionInicio');
+
+    if (!contenedor) return;
+
+    if (!Array.isArray(distribuciones) || distribuciones.length === 0) {
+        contenedor.innerHTML = `
+            <p>No hay distribuciones registradas por el administrador para tu sector.</p>
+        `;
+        return;
+    }
+
+    contenedor.innerHTML = `
+        <p>Hay <strong>${distribuciones.length}</strong> registros de distribución para tu sector.</p>
+    `;
+}
+
+function pintarTablaDistribuciones(distribuciones) {
+    const tbody = document.getElementById('tablaDistribucionesUsuario');
 
     if (!tbody) return;
 
     if (!Array.isArray(distribuciones) || distribuciones.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6">No hay horarios de distribución registrados para este sector.</td>
+                <td colspan="6">No hay horarios de distribución registrados para tu sector.</td>
             </tr>
         `;
         return;
@@ -272,7 +285,6 @@ function pintarTablaDistribucion(distribuciones) {
 
     tbody.innerHTML = distribuciones.map(item => {
         const fecha = obtenerValor(item, ['fecha', 'fecha_distribucion', 'fecha_inicio', 'created_at']);
-        const dia = obtenerDia(fecha);
         const inicio = obtenerValor(item, ['hora_inicio', 'inicio', 'hora', 'desde']) || 'Sin hora';
         const fin = obtenerValor(item, ['hora_fin', 'fin', 'hasta']) || 'Sin hora';
         const estado = obtenerValor(item, ['estado']) || 'Registrado';
@@ -281,25 +293,25 @@ function pintarTablaDistribucion(distribuciones) {
         return `
             <tr>
                 <td>${formatearFecha(fecha)}</td>
-                <td>${dia}</td>
-                <td>${inicio}</td>
-                <td>${fin}</td>
-                <td><span class="badge-blue">${estado}</span></td>
-                <td>${notas}</td>
+                <td>${obtenerDia(fecha)}</td>
+                <td>${escapeHTML(inicio)}</td>
+                <td>${escapeHTML(fin)}</td>
+                <td><span class="badge-blue">${escapeHTML(estado)}</span></td>
+                <td>${escapeHTML(notas)}</td>
             </tr>
         `;
     }).join('');
 }
 
-function pintarHistorialDistribucion(distribuciones) {
-    const tbody = document.querySelector('#section-historial tbody');
+function pintarHistorial(distribuciones) {
+    const tbody = document.getElementById('tablaHistorialUsuario');
 
     if (!tbody) return;
 
     if (!Array.isArray(distribuciones) || distribuciones.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4">No hay historial de distribución registrado.</td>
+                <td colspan="4">No hay historial de distribución registrado para tu sector.</td>
             </tr>
         `;
         return;
@@ -307,49 +319,74 @@ function pintarHistorialDistribucion(distribuciones) {
 
     tbody.innerHTML = distribuciones.map(item => {
         const fecha = obtenerValor(item, ['fecha', 'fecha_distribucion', 'fecha_inicio', 'created_at']);
-        const sector = obtenerValor(item, ['sector']) || localStorage.getItem('sector') || 'Sin sector';
+        const sector = obtenerValor(item, ['sector', 'nombre_sector']) || localStorage.getItem('sector') || 'Sin sector';
         const estado = obtenerValor(item, ['estado']) || 'Registrado';
         const observaciones = obtenerValor(item, ['observaciones', 'notas', 'descripcion']) || 'Sin observaciones';
 
         return `
             <tr>
                 <td>${formatearFecha(fecha)}</td>
-                <td>${sector}</td>
-                <td><span class="badge-green">${estado}</span></td>
-                <td>${observaciones}</td>
+                <td>${escapeHTML(sector)}</td>
+                <td><span class="badge-green">${escapeHTML(estado)}</span></td>
+                <td>${escapeHTML(observaciones)}</td>
             </tr>
         `;
     }).join('');
 }
 
 function pintarProximaDistribucion(distribuciones) {
-    const cards = document.querySelectorAll('.summary-card');
-
-    if (!cards || cards.length < 2) return;
-
-    const cardProxima = cards[1];
-
-    const titulo = cardProxima.querySelector('h2');
-    const detalle = cardProxima.querySelector('p');
-
     if (!Array.isArray(distribuciones) || distribuciones.length === 0) {
-        if (titulo) titulo.textContent = 'Sin programación';
-        if (detalle) detalle.textContent = 'No hay distribución registrada.';
+        setText('proximaDia', 'Sin programación');
+        setText('proximaHorario', 'No hay distribución registrada.');
         return;
     }
 
     const primera = distribuciones[0];
 
     const fecha = obtenerValor(primera, ['fecha', 'fecha_distribucion', 'fecha_inicio', 'created_at']);
-    const inicio = obtenerValor(primera, ['hora_inicio', 'inicio', 'hora', 'desde']) || '';
-    const fin = obtenerValor(primera, ['hora_fin', 'fin', 'hasta']) || '';
+    const inicio = obtenerValor(primera, ['hora_inicio', 'inicio', 'hora', 'desde']) || 'Sin hora';
+    const fin = obtenerValor(primera, ['hora_fin', 'fin', 'hasta']) || 'Sin hora';
 
-    if (titulo) titulo.textContent = obtenerDia(fecha);
-    if (detalle) detalle.textContent = `${inicio || 'Sin hora'} - ${fin || 'Sin hora'}`;
+    setText('proximaDia', obtenerDia(fecha));
+    setText('proximaHorario', `${inicio} - ${fin}`);
+}
+
+function pintarResumenHistorial(distribuciones) {
+    const total = Array.isArray(distribuciones) ? distribuciones.length : 0;
+
+    setText('totalDistribucionesMes', total);
+
+    if (total === 0) {
+        setText('cumplimientoUsuario', '0%');
+        setText('ultimaDistribucionFecha', 'Sin fecha');
+        setText('ultimaDistribucionHora', 'Sin horario');
+        return;
+    }
+
+    const completadas = distribuciones.filter(item => {
+        const estado = normalizar(obtenerValor(item, ['estado']));
+        return estado.includes('completado') ||
+               estado.includes('completada') ||
+               estado.includes('finalizado') ||
+               estado.includes('realizado');
+    }).length;
+
+    const porcentaje = Math.round((completadas / total) * 100);
+
+    setText('cumplimientoUsuario', `${porcentaje}%`);
+
+    const ultima = distribuciones[0];
+
+    const fecha = obtenerValor(ultima, ['fecha', 'fecha_distribucion', 'fecha_inicio', 'created_at']);
+    const inicio = obtenerValor(ultima, ['hora_inicio', 'inicio', 'hora', 'desde']) || 'Sin hora';
+    const fin = obtenerValor(ultima, ['hora_fin', 'fin', 'hasta']) || 'Sin hora';
+
+    setText('ultimaDistribucionFecha', formatearFecha(fecha));
+    setText('ultimaDistribucionHora', `${inicio} - ${fin}`);
 }
 
 // ===============================
-// INCIDENCIAS REALES
+// INCIDENCIAS
 // ===============================
 
 function pintarIncidencias(incidencias) {
@@ -368,32 +405,18 @@ function pintarAvisosInicio(incidencias) {
                 <span>ℹ</span>
                 <div>
                     <h4>Sin avisos recientes</h4>
-                    <p>No hay incidencias registradas para este usuario o sector.</p>
+                    <p>No hay incidencias registradas para tu sector.</p>
                 </div>
             </div>
         `;
         return;
     }
 
-    contenedor.innerHTML = incidencias.slice(0, 3).map(item => {
-        const tipo = obtenerValor(item, ['tipo', 'tipo_incidencia']) || 'Incidencia';
-        const descripcion = obtenerValor(item, ['descripcion', 'detalle', 'observaciones']) || 'Sin descripción';
-        const estado = obtenerValor(item, ['estado']) || 'Pendiente';
-
-        return `
-            <div class="notice ${claseAviso(estado)}">
-                <span>${iconoAviso(estado)}</span>
-                <div>
-                    <h4>${tipo}</h4>
-                    <p>${descripcion}</p>
-                </div>
-            </div>
-        `;
-    }).join('');
+    contenedor.innerHTML = incidencias.slice(0, 3).map(item => crearHTMLIncidencia(item)).join('');
 }
 
 function pintarNotificaciones(incidencias) {
-    const contenedor = document.querySelector('#section-notificaciones .notification-list');
+    const contenedor = document.getElementById('listaNotificacionesUsuario');
 
     if (!contenedor) return;
 
@@ -403,28 +426,30 @@ function pintarNotificaciones(incidencias) {
                 <span>ℹ</span>
                 <div>
                     <h4>Sin notificaciones</h4>
-                    <p>No hay incidencias o avisos registrados.</p>
+                    <p>No hay incidencias o avisos registrados por el administrador.</p>
                 </div>
             </div>
         `;
         return;
     }
 
-    contenedor.innerHTML = incidencias.map(item => {
-        const tipo = obtenerValor(item, ['tipo', 'tipo_incidencia']) || 'Incidencia';
-        const descripcion = obtenerValor(item, ['descripcion', 'detalle', 'observaciones']) || 'Sin descripción';
-        const estado = obtenerValor(item, ['estado']) || 'Pendiente';
+    contenedor.innerHTML = incidencias.map(item => crearHTMLIncidencia(item)).join('');
+}
 
-        return `
-            <div class="notice ${claseAviso(estado)}">
-                <span>${iconoAviso(estado)}</span>
-                <div>
-                    <h4>${tipo}</h4>
-                    <p>${descripcion}</p>
-                </div>
+function crearHTMLIncidencia(item) {
+    const tipo = obtenerValor(item, ['tipo', 'tipo_incidencia']) || 'Incidencia';
+    const descripcion = obtenerValor(item, ['descripcion', 'detalle', 'observaciones']) || 'Sin descripción';
+    const estado = obtenerValor(item, ['estado']) || 'Pendiente';
+
+    return `
+        <div class="notice ${claseAviso(estado)}">
+            <span>${iconoAviso(estado)}</span>
+            <div>
+                <h4>${escapeHTML(tipo)}</h4>
+                <p>${escapeHTML(descripcion)}</p>
             </div>
-        `;
-    }).join('');
+        </div>
+    `;
 }
 
 // ===============================
@@ -440,7 +465,8 @@ function configurarFormularioIncidencia() {
         event.preventDefault();
 
         const nombre = document.getElementById('incNombre').value.trim();
-        const sector = document.getElementById('incSector').value;
+        const sector = localStorage.getItem('sector') || '';
+        const correo = localStorage.getItem('correo') || '';
         const tipo = document.getElementById('incTipo').value;
         const descripcion = document.getElementById('incDescripcion').value.trim();
         const fecha = document.getElementById('incFecha').value;
@@ -456,11 +482,12 @@ function configurarFormularioIncidencia() {
             sector,
             estado: 'Pendiente',
             reportado_por: nombre,
+            correo,
             fecha_reporte: fecha
         };
 
         try {
-            const respuesta = await fetch(`${API_BASE}/api/incidencias`, {
+            const respuesta = await fetch(`${API_BASE}/api/usuario-invitado/incidencias`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -476,8 +503,9 @@ function configurarFormularioIncidencia() {
             }
 
             alert('Reporte enviado correctamente');
-            form.reset();
-            cargarDatosUsuarioDesdeLocalStorage();
+
+            document.getElementById('incDescripcion').value = '';
+
             cargarDashboardUsuario();
 
         } catch (error) {
@@ -551,14 +579,39 @@ function configurarCerrarSesion() {
 // FUNCIONES AUXILIARES
 // ===============================
 
+function setText(id, valor) {
+    const elemento = document.getElementById(id);
+
+    if (elemento) {
+        elemento.textContent = valor;
+    }
+}
+
+function setValue(id, valor) {
+    const elemento = document.getElementById(id);
+
+    if (elemento) {
+        elemento.value = valor;
+    }
+}
+
 function obtenerValor(objeto, posiblesCampos) {
     for (const campo of posiblesCampos) {
-        if (objeto && objeto[campo] !== undefined && objeto[campo] !== null && objeto[campo] !== '') {
+        if (
+            objeto &&
+            objeto[campo] !== undefined &&
+            objeto[campo] !== null &&
+            objeto[campo] !== ''
+        ) {
             return objeto[campo];
         }
     }
 
     return '';
+}
+
+function normalizar(valor) {
+    return String(valor || '').trim().toLowerCase();
 }
 
 function formatearFecha(fecha) {
@@ -587,22 +640,18 @@ function obtenerDia(fecha) {
     });
 }
 
-function normalizar(valor) {
-    return String(valor || '').trim().toLowerCase();
-}
-
 function claseAviso(estado) {
     const texto = normalizar(estado);
 
-    if (texto.includes('resuelto') || texto.includes('completado')) {
+    if (texto.includes('resuelto') || texto.includes('completado') || texto.includes('finalizado')) {
         return 'success';
     }
 
-    if (texto.includes('pendiente')) {
+    if (texto.includes('pendiente') || texto.includes('revision') || texto.includes('revisión')) {
         return 'warning';
     }
 
-    if (texto.includes('grave') || texto.includes('urgente')) {
+    if (texto.includes('urgente') || texto.includes('grave')) {
         return 'danger';
     }
 
@@ -612,13 +661,22 @@ function claseAviso(estado) {
 function iconoAviso(estado) {
     const texto = normalizar(estado);
 
-    if (texto.includes('resuelto') || texto.includes('completado')) {
+    if (texto.includes('resuelto') || texto.includes('completado') || texto.includes('finalizado')) {
         return '✓';
     }
 
-    if (texto.includes('pendiente')) {
+    if (texto.includes('pendiente') || texto.includes('revision') || texto.includes('revisión')) {
         return '⚠';
     }
 
     return 'ℹ';
+}
+
+function escapeHTML(valor) {
+    return String(valor || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 }
