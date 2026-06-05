@@ -6,27 +6,36 @@ const router = express.Router();
 const db = require('../config/db');
 const pool = db.pool || db;
 
-// ===============================
-// UTILIDADES
-// ===============================
+// =====================================================
+// UTILIDADES GENERALES
+// =====================================================
 
 async function obtenerColumnas(tabla) {
     try {
         const resultado = await pool.query(
             `
-            SELECT column_name
+            SELECT 
+                column_name,
+                data_type,
+                is_nullable,
+                column_default
             FROM information_schema.columns
             WHERE table_schema = 'public'
             AND table_name = $1
+            ORDER BY ordinal_position
             `,
             [tabla]
         );
 
-        return resultado.rows.map(row => row.column_name);
+        return resultado.rows;
     } catch (error) {
         console.error(`Error obteniendo columnas de ${tabla}:`, error.message);
         return [];
     }
+}
+
+function nombresColumnas(columnasInfo) {
+    return columnasInfo.map(col => col.column_name);
 }
 
 function normalizar(valor) {
@@ -42,22 +51,26 @@ async function consultaSegura(sql, params = []) {
         const resultado = await pool.query(sql, params);
         return resultado.rows;
     } catch (error) {
-        console.error('Consulta falló:', error.message);
+        console.error('Consulta segura falló:', error.message);
         return [];
     }
 }
 
-function agregarCampoInsert(columnas, campos, valores, params, nombreColumna, valor) {
-    if (columnas.includes(nombreColumna)) {
-        campos.push(nombreColumna);
-        params.push(valor);
-        valores.push(`$${params.length}`);
+function formatearFechaSQL(fecha) {
+    if (!fecha) return new Date();
+
+    const nuevaFecha = new Date(fecha);
+
+    if (isNaN(nuevaFecha.getTime())) {
+        return new Date();
     }
+
+    return nuevaFecha;
 }
 
-// ===============================
+// =====================================================
 // RUTA DE PRUEBA
-// ===============================
+// =====================================================
 
 router.get('/test', (req, res) => {
     res.json({
@@ -65,9 +78,9 @@ router.get('/test', (req, res) => {
     });
 });
 
-// ===============================
-// LOGIN USUARIO POR CORREO
-// ===============================
+// =====================================================
+// LOGIN DE USUARIO INVITADO
+// =====================================================
 
 router.post('/login', async (req, res) => {
     try {
@@ -150,16 +163,15 @@ router.post('/login', async (req, res) => {
         console.error('Error en login de usuario invitado:', error);
 
         return res.status(500).json({
-            mensaje: 'Error interno al validar usuario'
+            mensaje: 'Error interno al validar usuario',
+            detalle: error.message
         });
     }
 });
 
-// ===============================
+// =====================================================
 // DASHBOARD DEL USUARIO
-// ===============================
-// Este endpoint conecta usuario con lo que administra el administrador.
-// Usa el correo para buscar su familia y luego filtra por sector.
+// =====================================================
 
 router.get('/dashboard', async (req, res) => {
     try {
@@ -173,9 +185,9 @@ router.get('/dashboard', async (req, res) => {
 
         const correoNormalizado = correo.trim().toLowerCase();
 
-        // ===============================
-        // 1. FAMILIA DEL USUARIO
-        // ===============================
+        // =====================================================
+        // FAMILIA DEL USUARIO
+        // =====================================================
 
         const resultadoFamilia = await pool.query(
             `
@@ -206,26 +218,28 @@ router.get('/dashboard', async (req, res) => {
         const sectorUsuario = familia.sector || '';
         const nombreUsuario = familia.nombre_jefe || '';
 
-        // ===============================
-        // 2. DATOS DEL SECTOR
-        // ===============================
+        // =====================================================
+        // SECTOR
+        // =====================================================
 
-        const columnasSectores = await obtenerColumnas('sectores');
+        const columnasSectoresInfo = await obtenerColumnas('sectores');
+        const columnasSectores = nombresColumnas(columnasSectoresInfo);
+
         let sector = null;
 
         if (columnasSectores.length > 0) {
-            const columnaNombre = buscarColumna(columnasSectores, [
+            const columnaNombreSector = buscarColumna(columnasSectores, [
                 'nombre',
                 'nombre_sector',
                 'sector'
             ]);
 
-            if (columnaNombre) {
+            if (columnaNombreSector) {
                 const resultadoSector = await consultaSegura(
                     `
                     SELECT *
                     FROM sectores
-                    WHERE LOWER(${columnaNombre}::text) = LOWER($1)
+                    WHERE LOWER(${columnaNombreSector}::text) = LOWER($1)
                     LIMIT 1
                     `,
                     [sectorUsuario]
@@ -235,26 +249,20 @@ router.get('/dashboard', async (req, res) => {
             }
         }
 
-        // ===============================
-        // 3. DISTRIBUCIONES DEL SECTOR
-        // ===============================
+        // =====================================================
+        // DISTRIBUCIONES POR SECTOR
+        // =====================================================
 
-        const columnasDistribuciones = await obtenerColumnas('distribuciones');
+        const columnasDistribucionesInfo = await obtenerColumnas('distribuciones');
+        const columnasDistribuciones = nombresColumnas(columnasDistribucionesInfo);
+
         let distribuciones = [];
 
         if (columnasDistribuciones.length > 0) {
-            const params = [];
-            let where = '';
-
             const columnaSector = buscarColumna(columnasDistribuciones, [
                 'sector',
                 'nombre_sector'
             ]);
-
-            if (columnaSector) {
-                params.push(sectorUsuario);
-                where = `WHERE LOWER(${columnaSector}::text) = LOWER($1)`;
-            }
 
             const columnaOrden = buscarColumna(columnasDistribuciones, [
                 'fecha',
@@ -263,6 +271,14 @@ router.get('/dashboard', async (req, res) => {
                 'created_at',
                 'id'
             ]);
+
+            let where = '';
+            const params = [];
+
+            if (columnaSector) {
+                params.push(sectorUsuario);
+                where = `WHERE LOWER(${columnaSector}::text) = LOWER($1)`;
+            }
 
             const order = columnaOrden
                 ? `ORDER BY ${columnaOrden} DESC`
@@ -280,11 +296,13 @@ router.get('/dashboard', async (req, res) => {
             );
         }
 
-        // ===============================
-        // 4. INCIDENCIAS DEL USUARIO O SECTOR
-        // ===============================
+        // =====================================================
+        // INCIDENCIAS POR SECTOR / USUARIO / CORREO
+        // =====================================================
 
-        const columnasIncidencias = await obtenerColumnas('incidencias');
+        const columnasIncidenciasInfo = await obtenerColumnas('incidencias');
+        const columnasIncidencias = nombresColumnas(columnasIncidenciasInfo);
+
         let incidencias = [];
 
         if (columnasIncidencias.length > 0) {
@@ -296,14 +314,29 @@ router.get('/dashboard', async (req, res) => {
                 condiciones.push(`LOWER(sector::text) = LOWER($${params.length})`);
             }
 
+            if (columnasIncidencias.includes('nombre_sector')) {
+                params.push(sectorUsuario);
+                condiciones.push(`LOWER(nombre_sector::text) = LOWER($${params.length})`);
+            }
+
             if (columnasIncidencias.includes('reportado_por')) {
                 params.push(nombreUsuario);
                 condiciones.push(`LOWER(reportado_por::text) = LOWER($${params.length})`);
             }
 
+            if (columnasIncidencias.includes('nombre_reportante')) {
+                params.push(nombreUsuario);
+                condiciones.push(`LOWER(nombre_reportante::text) = LOWER($${params.length})`);
+            }
+
             if (columnasIncidencias.includes('correo')) {
                 params.push(correoNormalizado);
                 condiciones.push(`LOWER(correo::text) = LOWER($${params.length})`);
+            }
+
+            if (columnasIncidencias.includes('correo_reportante')) {
+                params.push(correoNormalizado);
+                condiciones.push(`LOWER(correo_reportante::text) = LOWER($${params.length})`);
             }
 
             const where = condiciones.length > 0
@@ -334,11 +367,13 @@ router.get('/dashboard', async (req, res) => {
             );
         }
 
-        // ===============================
-        // 5. ÚLTIMA LECTURA DEL TANQUE
-        // ===============================
+        // =====================================================
+        // LECTURA DE TANQUE
+        // =====================================================
 
-        const columnasTanques = await obtenerColumnas('lecturas_tanques');
+        const columnasTanquesInfo = await obtenerColumnas('lecturas_tanques');
+        const columnasTanques = nombresColumnas(columnasTanquesInfo);
+
         let tanque = null;
 
         if (columnasTanques.length > 0) {
@@ -366,9 +401,9 @@ router.get('/dashboard', async (req, res) => {
             tanque = resultadoTanque.length > 0 ? resultadoTanque[0] : null;
         }
 
-        // ===============================
-        // 6. RESUMEN DE REPORTES
-        // ===============================
+        // =====================================================
+        // RESUMEN DE REPORTES
+        // =====================================================
 
         const totalReportes = incidencias.length;
 
@@ -404,15 +439,17 @@ router.get('/dashboard', async (req, res) => {
         console.error('Error cargando dashboard usuario:', error);
 
         return res.status(500).json({
-            mensaje: 'Error interno al cargar dashboard de usuario'
+            mensaje: 'Error interno al cargar dashboard de usuario',
+            detalle: error.message
         });
     }
 });
 
-// ===============================
+// =====================================================
 // REGISTRAR INCIDENCIA DESDE USUARIO
-// ===============================
-// Esta ruta intenta adaptarse a las columnas reales de tu tabla incidencias.
+// =====================================================
+// Esta ruta se adapta a tu tabla real de incidencias.
+// También evita fallos por columnas obligatorias.
 
 router.post('/incidencias', async (req, res) => {
     try {
@@ -432,45 +469,122 @@ router.post('/incidencias', async (req, res) => {
             });
         }
 
-        const columnas = await obtenerColumnas('incidencias');
+        const columnasInfo = await obtenerColumnas('incidencias');
 
-        if (columnas.length === 0) {
+        if (columnasInfo.length === 0) {
             return res.status(500).json({
-                mensaje: 'No se pudo leer la estructura de la tabla incidencias'
+                mensaje: 'No se encontró la tabla incidencias'
             });
         }
+
+        const columnas = nombresColumnas(columnasInfo);
 
         const campos = [];
         const valores = [];
         const params = [];
 
-        agregarCampoInsert(columnas, campos, valores, params, 'tipo', tipo || 'Incidencia');
-        agregarCampoInsert(columnas, campos, valores, params, 'tipo_incidencia', tipo || 'Incidencia');
-        agregarCampoInsert(columnas, campos, valores, params, 'descripcion', descripcion);
-        agregarCampoInsert(columnas, campos, valores, params, 'detalle', descripcion);
-        agregarCampoInsert(columnas, campos, valores, params, 'observaciones', descripcion);
-        agregarCampoInsert(columnas, campos, valores, params, 'sector', sector || '');
-        agregarCampoInsert(columnas, campos, valores, params, 'estado', estado || 'Pendiente');
-        agregarCampoInsert(columnas, campos, valores, params, 'reportado_por', reportado_por || 'Usuario');
-        agregarCampoInsert(columnas, campos, valores, params, 'correo', correo || '');
-
-        if (columnas.includes('fecha_reporte')) {
-            campos.push('fecha_reporte');
-            params.push(fecha_reporte || new Date());
-            valores.push(`$${params.length}`);
+        function agregarSiExiste(nombreColumna, valor) {
+            if (columnas.includes(nombreColumna)) {
+                campos.push(nombreColumna);
+                params.push(valor);
+                valores.push(`$${params.length}`);
+            }
         }
 
-        if (columnas.includes('fecha_registro')) {
-            campos.push('fecha_registro');
-            params.push(new Date());
-            valores.push(`$${params.length}`);
-        }
+        // =====================================================
+        // DATOS PRINCIPALES
+        // =====================================================
 
-        if (columnas.includes('created_at')) {
-            campos.push('created_at');
-            params.push(new Date());
+        agregarSiExiste('tipo', tipo || 'Incidencia');
+        agregarSiExiste('tipo_incidencia', tipo || 'Incidencia');
+        agregarSiExiste('categoria', tipo || 'Incidencia');
+
+        agregarSiExiste('descripcion', descripcion);
+        agregarSiExiste('detalle', descripcion);
+        agregarSiExiste('observaciones', descripcion);
+        agregarSiExiste('comentario', descripcion);
+
+        agregarSiExiste('sector', sector || 'Sin sector');
+        agregarSiExiste('nombre_sector', sector || 'Sin sector');
+
+        agregarSiExiste('estado', estado || 'Pendiente');
+
+        agregarSiExiste('reportado_por', reportado_por || 'Usuario');
+        agregarSiExiste('nombre_reportante', reportado_por || 'Usuario');
+        agregarSiExiste('usuario_reporta', reportado_por || 'Usuario');
+
+        agregarSiExiste('correo', correo || '');
+        agregarSiExiste('correo_reportante', correo || '');
+
+        // =====================================================
+        // FECHAS
+        // =====================================================
+
+        const fechaFinal = formatearFechaSQL(fecha_reporte);
+
+        agregarSiExiste('fecha_reporte', fechaFinal);
+        agregarSiExiste('fecha_registro', fechaFinal);
+        agregarSiExiste('fecha', fechaFinal);
+        agregarSiExiste('created_at', fechaFinal);
+
+        // =====================================================
+        // CAMPOS OPCIONALES
+        // =====================================================
+
+        agregarSiExiste('prioridad', 'Media');
+        agregarSiExiste('nivel_prioridad', 'Media');
+        agregarSiExiste('origen', 'Usuario');
+        agregarSiExiste('canal', 'Panel de usuario');
+
+        // =====================================================
+        // RELLENAR COLUMNAS NOT NULL SIN DEFAULT
+        // =====================================================
+
+        columnasInfo.forEach((columna) => {
+            const nombre = columna.column_name;
+            const tipoDato = columna.data_type || '';
+            const esObligatoria = columna.is_nullable === 'NO';
+            const tieneDefault = columna.column_default !== null;
+
+            if (!esObligatoria || tieneDefault) return;
+            if (campos.includes(nombre)) return;
+
+            // No rellenar posibles IDs autogenerados
+            if (
+                nombre === 'id' ||
+                nombre === 'id_incidencia' ||
+                nombre === 'incidencia_id' ||
+                nombre.endsWith('_id')
+            ) {
+                return;
+            }
+
+            let valorDefecto = 'N/A';
+
+            if (
+                tipoDato.includes('integer') ||
+                tipoDato.includes('numeric') ||
+                tipoDato.includes('double') ||
+                tipoDato.includes('real')
+            ) {
+                valorDefecto = 0;
+            }
+
+            if (
+                tipoDato.includes('date') ||
+                tipoDato.includes('timestamp')
+            ) {
+                valorDefecto = new Date();
+            }
+
+            if (tipoDato.includes('boolean')) {
+                valorDefecto = false;
+            }
+
+            campos.push(nombre);
+            params.push(valorDefecto);
             valores.push(`$${params.length}`);
-        }
+        });
 
         if (campos.length === 0) {
             return res.status(500).json({
@@ -484,6 +598,13 @@ router.post('/incidencias', async (req, res) => {
             RETURNING *
         `;
 
+        console.log('==============================');
+        console.log('REGISTRANDO INCIDENCIA DESDE USUARIO');
+        console.log('Campos:', campos);
+        console.log('Valores:', params);
+        console.log('SQL:', sql);
+        console.log('==============================');
+
         const resultado = await pool.query(sql, params);
 
         return res.status(201).json({
@@ -492,10 +613,11 @@ router.post('/incidencias', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error registrando incidencia de usuario:', error);
+        console.error('Error registrando incidencia desde usuario:', error);
 
         return res.status(500).json({
-            mensaje: 'Error interno al registrar incidencia'
+            mensaje: 'Error interno al registrar incidencia',
+            detalle: error.message
         });
     }
 });
