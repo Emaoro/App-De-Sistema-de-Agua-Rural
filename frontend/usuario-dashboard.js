@@ -17,9 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarDashboardUsuario();
 });
 
-// ===============================
+// =====================================================
 // SESIÓN
-// ===============================
+// =====================================================
 
 function validarSesionUsuario() {
     const token = localStorage.getItem('token');
@@ -31,9 +31,9 @@ function validarSesionUsuario() {
     }
 }
 
-// ===============================
-// FECHA ACTUAL
-// ===============================
+// =====================================================
+// FECHA
+// =====================================================
 
 function colocarFechaActual() {
     const fecha = document.getElementById('fechaActualUsuario');
@@ -49,9 +49,9 @@ function colocarFechaActual() {
     });
 }
 
-// ===============================
+// =====================================================
 // DATOS INICIALES
-// ===============================
+// =====================================================
 
 function cargarDatosIniciales() {
     const familia = {
@@ -68,30 +68,19 @@ function cargarDatosIniciales() {
     pintarFamilia(familia);
 }
 
-// ===============================
-// CARGAR DATOS REALES DEL BACKEND
-// ===============================
+// =====================================================
+// CARGAR DATOS REALES
+// =====================================================
 
 async function cargarDashboardUsuario() {
     const correo = localStorage.getItem('correo');
 
-    if (!correo) {
-        return;
-    }
+    if (!correo) return;
 
     try {
         const respuesta = await fetch(`${API_BASE}/api/usuario-invitado/dashboard?correo=${encodeURIComponent(correo)}`);
 
-        const texto = await respuesta.text();
-
-        let data;
-
-        try {
-            data = JSON.parse(texto);
-        } catch (error) {
-            console.error('Respuesta no JSON:', texto);
-            return;
-        }
+        const data = await obtenerJSONSeguro(respuesta);
 
         if (!respuesta.ok) {
             console.warn(data.mensaje || 'No se pudo cargar el dashboard de usuario');
@@ -109,9 +98,9 @@ async function cargarDashboardUsuario() {
     }
 }
 
-// ===============================
+// =====================================================
 // PINTAR FAMILIA
-// ===============================
+// =====================================================
 
 function pintarFamilia(familia) {
     if (!familia) return;
@@ -137,8 +126,8 @@ function pintarFamilia(familia) {
     setText('nombreBienvenida', nombre);
     setText('sectorBienvenida', sector);
     setText('perfilNombre', nombre);
-    setText('estadoServicioUsuario', estado || 'Activo');
-    setText('perfilEstado', estado || 'Activo');
+    setText('estadoServicioUsuario', estado);
+    setText('perfilEstado', estado);
     setText('perfilFecha', fechaRegistro ? formatearFecha(fechaRegistro) : 'Sin fecha');
 
     setValue('infoNombre', nombre);
@@ -173,9 +162,9 @@ function cargarSectorEnSelect(id, sector) {
     `;
 }
 
-// ===============================
+// =====================================================
 // TANQUE
-// ===============================
+// =====================================================
 
 function pintarTanque(tanque) {
     const tankFill = document.getElementById('tankFill');
@@ -222,9 +211,9 @@ function pintarTanque(tanque) {
     }
 }
 
-// ===============================
+// =====================================================
 // REPORTES
-// ===============================
+// =====================================================
 
 function pintarReportes(resumen) {
     const total = resumen?.total || 0;
@@ -240,9 +229,9 @@ function pintarReportes(resumen) {
     setText('totalResueltosUsuario', resueltos);
 }
 
-// ===============================
+// =====================================================
 // DISTRIBUCIONES
-// ===============================
+// =====================================================
 
 function pintarDistribuciones(distribuciones) {
     pintarResumenDistribucionInicio(distribuciones);
@@ -385,9 +374,9 @@ function pintarResumenHistorial(distribuciones) {
     setText('ultimaDistribucionHora', `${inicio} - ${fin}`);
 }
 
-// ===============================
+// =====================================================
 // INCIDENCIAS
-// ===============================
+// =====================================================
 
 function pintarIncidencias(incidencias) {
     pintarAvisosInicio(incidencias);
@@ -437,8 +426,8 @@ function pintarNotificaciones(incidencias) {
 }
 
 function crearHTMLIncidencia(item) {
-    const tipo = obtenerValor(item, ['tipo', 'tipo_incidencia']) || 'Incidencia';
-    const descripcion = obtenerValor(item, ['descripcion', 'detalle', 'observaciones']) || 'Sin descripción';
+    const tipo = obtenerValor(item, ['tipo', 'tipo_incidencia', 'categoria']) || 'Incidencia';
+    const descripcion = obtenerValor(item, ['descripcion', 'detalle', 'observaciones', 'comentario']) || 'Sin descripción';
     const estado = obtenerValor(item, ['estado']) || 'Pendiente';
 
     return `
@@ -452,9 +441,9 @@ function crearHTMLIncidencia(item) {
     `;
 }
 
-// ===============================
+// =====================================================
 // FORMULARIO INCIDENCIA
-// ===============================
+// =====================================================
 
 function configurarFormularioIncidencia() {
     const form = document.getElementById('formIncidenciaUsuario');
@@ -464,16 +453,23 @@ function configurarFormularioIncidencia() {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const nombre = document.getElementById('incNombre').value.trim();
-        const sector = localStorage.getItem('sector') || '';
+        const nombre = document.getElementById('incNombre')?.value.trim() || localStorage.getItem('nombre') || 'Usuario';
+        const sector = localStorage.getItem('sector') || document.getElementById('incSector')?.value || 'Sin sector';
         const correo = localStorage.getItem('correo') || '';
-        const tipo = document.getElementById('incTipo').value;
-        const descripcion = document.getElementById('incDescripcion').value.trim();
-        const fecha = document.getElementById('incFecha').value;
+        const tipo = document.getElementById('incTipo')?.value || 'Incidencia';
+        const descripcion = document.getElementById('incDescripcion')?.value.trim() || '';
+        const fecha = document.getElementById('incFecha')?.value || '';
 
         if (!descripcion) {
             alert('Ingrese una descripción de la incidencia');
             return;
+        }
+
+        const boton = form.querySelector('button[type="submit"]');
+
+        if (boton) {
+            boton.disabled = true;
+            boton.textContent = 'Enviando...';
         }
 
         const data = {
@@ -495,29 +491,39 @@ function configurarFormularioIncidencia() {
                 body: JSON.stringify(data)
             });
 
-            const resultado = await respuesta.json();
+            const resultado = await obtenerJSONSeguro(respuesta);
 
             if (!respuesta.ok) {
-                alert(resultado.mensaje || 'No se pudo enviar el reporte');
+                console.error('Error al registrar incidencia:', resultado);
+                alert(resultado.detalle || resultado.mensaje || 'No se pudo enviar el reporte');
                 return;
             }
 
             alert('Reporte enviado correctamente');
 
-            document.getElementById('incDescripcion').value = '';
+            const descripcionInput = document.getElementById('incDescripcion');
 
-            cargarDashboardUsuario();
+            if (descripcionInput) {
+                descripcionInput.value = '';
+            }
+
+            await cargarDashboardUsuario();
 
         } catch (error) {
             console.error('Error enviando incidencia:', error);
             alert('No se pudo conectar con el servidor');
+        } finally {
+            if (boton) {
+                boton.disabled = false;
+                boton.textContent = 'Enviar reporte';
+            }
         }
     });
 }
 
-// ===============================
+// =====================================================
 // NAVEGACIÓN
-// ===============================
+// =====================================================
 
 function activarNavegacion() {
     const botones = document.querySelectorAll('.menu-item');
@@ -560,9 +566,9 @@ function activarNavegacion() {
     }
 }
 
-// ===============================
+// =====================================================
 // CERRAR SESIÓN
-// ===============================
+// =====================================================
 
 function configurarCerrarSesion() {
     const btn = document.getElementById('btnCerrarSesionUsuario');
@@ -575,9 +581,23 @@ function configurarCerrarSesion() {
     });
 }
 
-// ===============================
-// FUNCIONES AUXILIARES
-// ===============================
+// =====================================================
+// AUXILIARES
+// =====================================================
+
+async function obtenerJSONSeguro(respuesta) {
+    const texto = await respuesta.text();
+
+    try {
+        return JSON.parse(texto);
+    } catch (error) {
+        console.error('Respuesta no JSON:', texto);
+        return {
+            mensaje: 'El servidor no respondió correctamente',
+            detalle: texto
+        };
+    }
+}
 
 function setText(id, valor) {
     const elemento = document.getElementById(id);
