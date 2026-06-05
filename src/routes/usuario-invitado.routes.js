@@ -29,8 +29,12 @@ async function obtenerColumnas(tabla) {
     }
 }
 
+function normalizar(valor) {
+    return String(valor || '').trim().toLowerCase();
+}
+
 function buscarColumna(columnas, posibles) {
-    return posibles.find(col => columnas.includes(col)) || null;
+    return posibles.find(columna => columnas.includes(columna)) || null;
 }
 
 async function consultaSegura(sql, params = []) {
@@ -38,13 +42,17 @@ async function consultaSegura(sql, params = []) {
         const resultado = await pool.query(sql, params);
         return resultado.rows;
     } catch (error) {
-        console.error('Consulta segura falló:', error.message);
+        console.error('Consulta falló:', error.message);
         return [];
     }
 }
 
-function normalizarTexto(valor) {
-    return String(valor || '').trim().toLowerCase();
+function agregarCampoInsert(columnas, campos, valores, params, nombreColumna, valor) {
+    if (columnas.includes(nombreColumna)) {
+        campos.push(nombreColumna);
+        params.push(valor);
+        valores.push(`$${params.length}`);
+    }
 }
 
 // ===============================
@@ -58,7 +66,7 @@ router.get('/test', (req, res) => {
 });
 
 // ===============================
-// LOGIN DE USUARIO INVITADO
+// LOGIN USUARIO POR CORREO
 // ===============================
 
 router.post('/login', async (req, res) => {
@@ -73,7 +81,8 @@ router.post('/login', async (req, res) => {
 
         const correoNormalizado = correo.trim().toLowerCase();
 
-        const consulta = `
+        const resultado = await pool.query(
+            `
             SELECT 
                 id,
                 nombre_jefe,
@@ -87,9 +96,9 @@ router.post('/login', async (req, res) => {
             FROM familias
             WHERE LOWER(correo) = $1
             LIMIT 1
-        `;
-
-        const resultado = await pool.query(consulta, [correoNormalizado]);
+            `,
+            [correoNormalizado]
+        );
 
         if (resultado.rows.length === 0) {
             return res.status(404).json({
@@ -98,7 +107,8 @@ router.post('/login', async (req, res) => {
         }
 
         const familia = resultado.rows[0];
-        const estado = normalizarTexto(familia.estado);
+
+        const estado = normalizar(familia.estado);
 
         if (estado !== 'activa' && estado !== 'activo') {
             return res.status(403).json({
@@ -148,9 +158,8 @@ router.post('/login', async (req, res) => {
 // ===============================
 // DASHBOARD DEL USUARIO
 // ===============================
-// Este endpoint trae datos reales desde Neon.
-// Usa el correo para ubicar la familia y luego consulta
-// incidencias, distribuciones y lecturas relacionadas.
+// Este endpoint conecta usuario con lo que administra el administrador.
+// Usa el correo para buscar su familia y luego filtra por sector.
 
 router.get('/dashboard', async (req, res) => {
     try {
@@ -165,10 +174,10 @@ router.get('/dashboard', async (req, res) => {
         const correoNormalizado = correo.trim().toLowerCase();
 
         // ===============================
-        // 1. FAMILIA
+        // 1. FAMILIA DEL USUARIO
         // ===============================
 
-        const familiaResultado = await pool.query(
+        const resultadoFamilia = await pool.query(
             `
             SELECT 
                 id,
@@ -187,68 +196,43 @@ router.get('/dashboard', async (req, res) => {
             [correoNormalizado]
         );
 
-        if (familiaResultado.rows.length === 0) {
+        if (resultadoFamilia.rows.length === 0) {
             return res.status(404).json({
                 mensaje: 'Familia no encontrada'
             });
         }
 
-        const familia = familiaResultado.rows[0];
-        const sector = familia.sector || '';
-        const nombre = familia.nombre_jefe || '';
+        const familia = resultadoFamilia.rows[0];
+        const sectorUsuario = familia.sector || '';
+        const nombreUsuario = familia.nombre_jefe || '';
 
         // ===============================
-        // 2. INCIDENCIAS DEL USUARIO / SECTOR
+        // 2. DATOS DEL SECTOR
         // ===============================
 
-        const columnasIncidencias = await obtenerColumnas('incidencias');
-        let incidencias = [];
+        const columnasSectores = await obtenerColumnas('sectores');
+        let sector = null;
 
-        if (columnasIncidencias.length > 0) {
-            const condiciones = [];
-            const params = [];
-
-            if (columnasIncidencias.includes('sector')) {
-                params.push(sector);
-                condiciones.push(`LOWER(sector::text) = LOWER($${params.length})`);
-            }
-
-            if (columnasIncidencias.includes('reportado_por')) {
-                params.push(nombre);
-                condiciones.push(`LOWER(reportado_por::text) = LOWER($${params.length})`);
-            }
-
-            if (columnasIncidencias.includes('correo')) {
-                params.push(correoNormalizado);
-                condiciones.push(`LOWER(correo::text) = LOWER($${params.length})`);
-            }
-
-            const columnaOrden = buscarColumna(columnasIncidencias, [
-                'fecha_reporte',
-                'fecha_registro',
-                'fecha',
-                'created_at',
-                'id'
+        if (columnasSectores.length > 0) {
+            const columnaNombre = buscarColumna(columnasSectores, [
+                'nombre',
+                'nombre_sector',
+                'sector'
             ]);
 
-            const where = condiciones.length > 0
-                ? `WHERE ${condiciones.join(' OR ')}`
-                : '';
+            if (columnaNombre) {
+                const resultadoSector = await consultaSegura(
+                    `
+                    SELECT *
+                    FROM sectores
+                    WHERE LOWER(${columnaNombre}::text) = LOWER($1)
+                    LIMIT 1
+                    `,
+                    [sectorUsuario]
+                );
 
-            const order = columnaOrden
-                ? `ORDER BY ${columnaOrden} DESC`
-                : '';
-
-            incidencias = await consultaSegura(
-                `
-                SELECT *
-                FROM incidencias
-                ${where}
-                ${order}
-                LIMIT 20
-                `,
-                params
-            );
+                sector = resultadoSector.length > 0 ? resultadoSector[0] : null;
+            }
         }
 
         // ===============================
@@ -262,9 +246,14 @@ router.get('/dashboard', async (req, res) => {
             const params = [];
             let where = '';
 
-            if (columnasDistribuciones.includes('sector')) {
-                params.push(sector);
-                where = `WHERE LOWER(sector::text) = LOWER($1)`;
+            const columnaSector = buscarColumna(columnasDistribuciones, [
+                'sector',
+                'nombre_sector'
+            ]);
+
+            if (columnaSector) {
+                params.push(sectorUsuario);
+                where = `WHERE LOWER(${columnaSector}::text) = LOWER($1)`;
             }
 
             const columnaOrden = buscarColumna(columnasDistribuciones, [
@@ -285,14 +274,68 @@ router.get('/dashboard', async (req, res) => {
                 FROM distribuciones
                 ${where}
                 ${order}
-                LIMIT 20
+                LIMIT 30
                 `,
                 params
             );
         }
 
         // ===============================
-        // 4. ÚLTIMA LECTURA DEL TANQUE
+        // 4. INCIDENCIAS DEL USUARIO O SECTOR
+        // ===============================
+
+        const columnasIncidencias = await obtenerColumnas('incidencias');
+        let incidencias = [];
+
+        if (columnasIncidencias.length > 0) {
+            const condiciones = [];
+            const params = [];
+
+            if (columnasIncidencias.includes('sector')) {
+                params.push(sectorUsuario);
+                condiciones.push(`LOWER(sector::text) = LOWER($${params.length})`);
+            }
+
+            if (columnasIncidencias.includes('reportado_por')) {
+                params.push(nombreUsuario);
+                condiciones.push(`LOWER(reportado_por::text) = LOWER($${params.length})`);
+            }
+
+            if (columnasIncidencias.includes('correo')) {
+                params.push(correoNormalizado);
+                condiciones.push(`LOWER(correo::text) = LOWER($${params.length})`);
+            }
+
+            const where = condiciones.length > 0
+                ? `WHERE ${condiciones.join(' OR ')}`
+                : '';
+
+            const columnaOrden = buscarColumna(columnasIncidencias, [
+                'fecha_reporte',
+                'fecha_registro',
+                'fecha',
+                'created_at',
+                'id'
+            ]);
+
+            const order = columnaOrden
+                ? `ORDER BY ${columnaOrden} DESC`
+                : '';
+
+            incidencias = await consultaSegura(
+                `
+                SELECT *
+                FROM incidencias
+                ${where}
+                ${order}
+                LIMIT 30
+                `,
+                params
+            );
+        }
+
+        // ===============================
+        // 5. ÚLTIMA LECTURA DEL TANQUE
         // ===============================
 
         const columnasTanques = await obtenerColumnas('lecturas_tanques');
@@ -302,6 +345,7 @@ router.get('/dashboard', async (req, res) => {
             const columnaOrden = buscarColumna(columnasTanques, [
                 'fecha_lectura',
                 'fecha_registro',
+                'fecha',
                 'created_at',
                 'id'
             ]);
@@ -310,7 +354,7 @@ router.get('/dashboard', async (req, res) => {
                 ? `ORDER BY ${columnaOrden} DESC`
                 : '';
 
-            const lecturas = await consultaSegura(
+            const resultadoTanque = await consultaSegura(
                 `
                 SELECT *
                 FROM lecturas_tanques
@@ -319,44 +363,139 @@ router.get('/dashboard', async (req, res) => {
                 `
             );
 
-            tanque = lecturas.length > 0 ? lecturas[0] : null;
+            tanque = resultadoTanque.length > 0 ? resultadoTanque[0] : null;
         }
 
         // ===============================
-        // 5. CONTADORES DE REPORTES
+        // 6. RESUMEN DE REPORTES
         // ===============================
 
         const totalReportes = incidencias.length;
 
-        const reportesPendientes = incidencias.filter(item => {
-            const estado = normalizarTexto(item.estado);
-            return estado.includes('pendiente') || estado.includes('revision') || estado.includes('revisión');
+        const pendientes = incidencias.filter(item => {
+            const estado = normalizar(item.estado);
+            return estado.includes('pendiente') ||
+                   estado.includes('revision') ||
+                   estado.includes('revisión');
         }).length;
 
-        const reportesResueltos = incidencias.filter(item => {
-            const estado = normalizarTexto(item.estado);
-            return estado.includes('resuelto') || estado.includes('completado') || estado.includes('finalizado');
+        const resueltos = incidencias.filter(item => {
+            const estado = normalizar(item.estado);
+            return estado.includes('resuelto') ||
+                   estado.includes('completado') ||
+                   estado.includes('finalizado');
         }).length;
 
         return res.json({
             mensaje: 'Dashboard de usuario cargado correctamente',
             familia,
             sector,
-            tanque,
             distribuciones,
             incidencias,
+            tanque,
             resumen_reportes: {
                 total: totalReportes,
-                pendientes: reportesPendientes,
-                resueltos: reportesResueltos
+                pendientes,
+                resueltos
             }
         });
 
     } catch (error) {
-        console.error('Error cargando dashboard de usuario:', error);
+        console.error('Error cargando dashboard usuario:', error);
 
         return res.status(500).json({
             mensaje: 'Error interno al cargar dashboard de usuario'
+        });
+    }
+});
+
+// ===============================
+// REGISTRAR INCIDENCIA DESDE USUARIO
+// ===============================
+// Esta ruta intenta adaptarse a las columnas reales de tu tabla incidencias.
+
+router.post('/incidencias', async (req, res) => {
+    try {
+        const {
+            tipo,
+            descripcion,
+            sector,
+            estado,
+            reportado_por,
+            correo,
+            fecha_reporte
+        } = req.body;
+
+        if (!descripcion || descripcion.trim() === '') {
+            return res.status(400).json({
+                mensaje: 'Ingrese una descripción de la incidencia'
+            });
+        }
+
+        const columnas = await obtenerColumnas('incidencias');
+
+        if (columnas.length === 0) {
+            return res.status(500).json({
+                mensaje: 'No se pudo leer la estructura de la tabla incidencias'
+            });
+        }
+
+        const campos = [];
+        const valores = [];
+        const params = [];
+
+        agregarCampoInsert(columnas, campos, valores, params, 'tipo', tipo || 'Incidencia');
+        agregarCampoInsert(columnas, campos, valores, params, 'tipo_incidencia', tipo || 'Incidencia');
+        agregarCampoInsert(columnas, campos, valores, params, 'descripcion', descripcion);
+        agregarCampoInsert(columnas, campos, valores, params, 'detalle', descripcion);
+        agregarCampoInsert(columnas, campos, valores, params, 'observaciones', descripcion);
+        agregarCampoInsert(columnas, campos, valores, params, 'sector', sector || '');
+        agregarCampoInsert(columnas, campos, valores, params, 'estado', estado || 'Pendiente');
+        agregarCampoInsert(columnas, campos, valores, params, 'reportado_por', reportado_por || 'Usuario');
+        agregarCampoInsert(columnas, campos, valores, params, 'correo', correo || '');
+
+        if (columnas.includes('fecha_reporte')) {
+            campos.push('fecha_reporte');
+            params.push(fecha_reporte || new Date());
+            valores.push(`$${params.length}`);
+        }
+
+        if (columnas.includes('fecha_registro')) {
+            campos.push('fecha_registro');
+            params.push(new Date());
+            valores.push(`$${params.length}`);
+        }
+
+        if (columnas.includes('created_at')) {
+            campos.push('created_at');
+            params.push(new Date());
+            valores.push(`$${params.length}`);
+        }
+
+        if (campos.length === 0) {
+            return res.status(500).json({
+                mensaje: 'No hay columnas compatibles para registrar la incidencia'
+            });
+        }
+
+        const sql = `
+            INSERT INTO incidencias (${campos.join(', ')})
+            VALUES (${valores.join(', ')})
+            RETURNING *
+        `;
+
+        const resultado = await pool.query(sql, params);
+
+        return res.status(201).json({
+            mensaje: 'Incidencia registrada correctamente',
+            incidencia: resultado.rows[0]
+        });
+
+    } catch (error) {
+        console.error('Error registrando incidencia de usuario:', error);
+
+        return res.status(500).json({
+            mensaje: 'Error interno al registrar incidencia'
         });
     }
 });
