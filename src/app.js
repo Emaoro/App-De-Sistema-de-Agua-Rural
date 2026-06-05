@@ -25,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 // /distribucion.html
 // /reportes.html
 // /configuracion.html
+// /usuario-dashboard.html
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 
@@ -42,6 +43,9 @@ const configuracionRoutes = require('./routes/configuracion.routes');
 const sectorRoutes = require('./routes/sector.routes');
 const reporteRoutes = require('./routes/reporte.routes');
 
+// Ruta nueva para el login y dashboard del usuario invitado
+const usuarioInvitadoRoutes = require('./routes/usuario-invitado.routes');
+
 app.use('/api/auth', authRoutes);
 app.use('/api/familias', familiaRoutes);
 app.use('/api/incidencias', incidenciaRoutes);
@@ -51,6 +55,9 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/configuracion', configuracionRoutes);
 app.use('/api/sectores', sectorRoutes);
 app.use('/api/reportes', reporteRoutes);
+
+// Ruta nueva del usuario invitado
+app.use('/api/usuario-invitado', usuarioInvitadoRoutes);
 
 // ===============================
 // RUTA PRINCIPAL
@@ -64,6 +71,22 @@ app.get('/', (req, res) => {
 });
 
 // ===============================
+// ATAJOS DE NAVEGACIÓN
+// ===============================
+
+app.get('/login', (req, res) => {
+    res.redirect('/login.html');
+});
+
+app.get('/admin', (req, res) => {
+    res.redirect('/dashboard.html');
+});
+
+app.get('/usuario', (req, res) => {
+    res.redirect('/usuario-dashboard.html');
+});
+
+// ===============================
 // RUTA DE PRUEBA DE API
 // ===============================
 
@@ -72,19 +95,41 @@ app.get('/api', (req, res) => {
         mensaje: 'API del Sistema de Agua Rural funcionando correctamente',
         estado: 'OK',
         servidor: 'Render',
-        frontend: '/login.html'
+        frontend: '/login.html',
+        rutas: {
+            auth: '/api/auth',
+            familias: '/api/familias',
+            incidencias: '/api/incidencias',
+            tanques: '/api/tanques',
+            distribucion: '/api/distribucion',
+            dashboard: '/api/dashboard',
+            configuracion: '/api/configuracion',
+            sectores: '/api/sectores',
+            reportes: '/api/reportes',
+            usuarioInvitado: '/api/usuario-invitado'
+        }
     });
 });
 
 // ===============================
-// RUTAS NO ENCONTRADAS
+// RUTAS API NO ENCONTRADAS
 // ===============================
 
-app.use((req, res) => {
+app.use('/api', (req, res) => {
     res.status(404).json({
-        mensaje: 'Ruta no encontrada',
+        mensaje: 'Ruta API no encontrada',
         ruta: req.originalUrl
     });
+});
+
+// ===============================
+// PÁGINAS NO ENCONTRADAS
+// ===============================
+// Si alguien entra a una página que no existe,
+// lo manda al login para evitar pantalla Not Found.
+
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, '../frontend/login.html'));
 });
 
 module.exports = app;
