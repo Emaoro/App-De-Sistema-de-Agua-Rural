@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Control de Agua</title>
+
+ <link rel="stylesheet" href="reportes.css?v=20260605">
+<link rel="stylesheet" href="sidebar.css?v=20260605">
+<link rel="stylesheet" href="responsive.css?v=20260605">
+
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+
+        <header class="header report-header">
+
+            <div>
+                <h1>Reportes</h1>
+                <p>Consulta y genera reportes del sistema.</p>
+            </div>
+
+            <div class="date-actions">
+                <input type="date" id="fechaInicio">
+                <span>-</span>
+                <input type="date" id="fechaFin">
+
+                <button class="export-btn" id="btnExportarReporte">
+                    ⬇ Exportar reporte
+                </button>
+            </div>
+
+        </header>
+
+        <section class="stats">
+
+            <div class="stat-card">
+                <div class="stat-icon purple">👥</div>
+                <div>
+                    <p>Total familias</p>
+                    <h2 id="totalFamilias">0</h2>
+                    <span>Registradas</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">💧</div>
+                <div>
+                    <p>Distribuidas</p>
+                    <h2><span id="totalLitros">0</span> L</h2>
+                    <span>Litros registrados</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon orange">🏠</div>
+                <div>
+                    <p>Sin distribución</p>
+                    <h2 id="sinDistribucion">0</h2>
+                    <span>Familias sin registro</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon violet">⚠</div>
+                <div>
+                    <p>Incidencias</p>
+                    <h2 id="totalIncidencias">0</h2>
+                    <span>Registradas</span>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="charts-grid">
+
+            <div class="chart-card">
+
+                <div class="card-header">
+                    <h2>Distribución de agua</h2>
+                    <p>Porcentaje de familias con acceso al servicio</p>
+                </div>
+
+                <div class="chart-content">
+
+                    <div class="donut donut-blue">
+                        <div class="donut-center">
+                            <strong id="porcentajeAcceso">0%</strong>
+                            <span>Con acceso</span>
+                        </div>
+                    </div>
+
+                    <div class="legend">
+                        <div class="legend-row">
+                            <span class="dot blue"></span>
+                            <div>
+                                <strong>Con acceso</strong>
+                                <p><span id="familiasConAcceso">0</span> familias</p>
+                            </div>
+                        </div>
+
+                        <div class="legend-row">
+                            <span class="dot gray"></span>
+                            <div>
+                                <strong>Sin acceso</strong>
+                                <p><span id="familiasSinAcceso">0</span> familias</p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <strong>Total</strong>
+                        <p><span id="totalFamiliasGrafica">0</span> familias</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="chart-card">
+
+                <div class="card-header">
+                    <h2>Incidencias por tipo</h2>
+                    <p>Cantidad de incidencias registradas</p>
+                </div>
+
+                <div class="chart-content">
+
+                    <div class="donut donut-multi">
+                        <div class="donut-center">
+                            <strong id="totalIncidenciasGrafica">0</strong>
+                            <span>Incidencias</span>
+                        </div>
+                    </div>
+
+                    <div class="legend" id="leyendaIncidencias">
+                        <p>No hay incidencias registradas.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="tabla-card">
+
+            <div class="tabla-header">
+                <div>
+                    <h2>Resumen de reportes generados</h2>
+                    <p>Historial de reportes consultados desde el sistema.</p>
+                </div>
+
+                <button id="btnGenerarReporte">
+                    Generar reporte
+                </button>
+            </div>
+
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Reporte</th>
+                        <th>Fecha de generación</th>
+                        <th>Periodo</th>
+                        <th>Estado</th>
+                        <th>Generado por</th>
+                        <th>Tamaño</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaReportes">
+                    <tr>
+                        <td colspan="7" class="empty-cell">
+                            No hay reportes generados.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div id="contenidoReporte" class="resultado-reporte">
+                <p>No hay reporte generado.</p>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<div class="toast" id="toast">
+    <span>✓</span>
+    <div id="toastMensaje">Reporte generado correctamente</div>
+</div>
+
+<div class="modal-overlay" id="modalReporte">
+    <div class="modal-reporte">
+
+        <div class="modal-header">
+            <div>
+                <h2 id="modalTituloReporte">Vista previa del reporte</h2>
+                <p id="modalSubtituloReporte">Información generada desde el sistema.</p>
+            </div>
+
+            <button class="close-modal" id="cerrarModalReporte">×</button>
+        </div>
+
+        <div class="modal-body" id="modalContenidoReporte">
+            <p>No hay información para mostrar.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancelar" id="cerrarModalReporteAbajo">
+                Cerrar
+            </button>
+
+            <button class="btn-guardar" id="btnDescargarModal">
+                Descargar JSON
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+    cargarSidebar('reportes');
+</script>
+<script src="reportes.js?v=20260605"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribución - Control de Agua</title>
+
+<link rel="stylesheet" href="distribucion.css?v=20260605">
+<link rel="stylesheet" href="sidebar.css?v=20260605">
+<link rel="stylesheet" href="responsive.css?v=20260605">
+
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+
+        <header class="header">
+
+            <div>
+                <h1>Distribución</h1>
+                <p>Planificación y control de la distribución de agua por sectores.</p>
+            </div>
+
+            <button class="save-btn" id="btnGuardarSuperior">
+                Guardar distribución
+            </button>
+
+        </header>
+
+        <section class="stats">
+
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+
+                <div>
+                    <p>Total distribuciones</p>
+                    <h2 id="totalDistribuciones">0</h2>
+                    <span>Registros guardados</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">💧</div>
+
+                <div>
+                    <p>Litros distribuidos</p>
+                    <h2 id="litrosDistribuidos">0</h2>
+                    <span>Total registrado</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon purple">▦</div>
+
+                <div>
+                    <p>Sectores atendidos</p>
+                    <h2 id="sectoresAtendidos">0</h2>
+                    <span>Según registros</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon yellow">👥</div>
+
+                <div>
+                    <p>Familias atendidas</p>
+                    <h2 id="familiasAtendidas">0</h2>
+                    <span>Estimación del sistema</span>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="content-grid">
+
+            <div class="form-card">
+
+                <div class="card-header">
+                    <h2>Registrar distribución de agua</h2>
+                    <p>Ingrese la información de la distribución realizada o programada.</p>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="input-group">
+                        <label>Sector o sectores</label>
+                        <select id="sectores">
+                            <option value="">Seleccione un sector</option>
+                            <option value="Sector A">Sector A</option>
+                            <option value="Sector B">Sector B</option>
+                            <option value="Sector C">Sector C</option>
+                            <option value="Sector D">Sector D</option>
+                            <option value="Sector E">Sector E</option>
+                            <option value="Sector F">Sector F</option>
+                            <option value="Todos los sectores">Todos los sectores</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Litros distribuidos</label>
+                        <input type="number" id="litros" placeholder="Ejemplo: 4500">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Familias atendidas</label>
+                        <input type="number" id="familias_atendidas" placeholder="Ejemplo: 25">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Responsable</label>
+                        <input type="text" id="responsable" placeholder="Nombre del responsable">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Fecha y hora</label>
+                        <input type="datetime-local" id="fecha">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Estado</label>
+                        <select id="estado">
+                            <option value="Programada">Programada</option>
+                            <option value="Ejecutada">Ejecutada</option>
+                            <option value="Cancelada">Cancelada</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group full">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones" placeholder="Ingrese observaciones de la distribución"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="buttons">
+
+                    <button class="btn-clear" id="btnLimpiar">
+                        Limpiar
+                    </button>
+
+                    <button class="btn-save" id="btnRegistrar">
+                        Registrar distribución
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="help-card">
+
+                <h3>Información</h3>
+
+                <div class="help-item">
+                    <strong>Sectores</strong>
+                    <p>Permite registrar a qué sector se le distribuyó agua.</p>
+                </div>
+
+                <div class="help-item">
+                    <strong>Litros</strong>
+                    <p>Sirve para controlar la cantidad de agua entregada.</p>
+                </div>
+
+                <div class="help-item">
+                    <strong>Familias</strong>
+                    <p>Ayuda a estimar cuántas familias fueron beneficiadas.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="tabla-card">
+
+            <div class="tabla-header">
+                <div>
+                    <h2>Historial de distribución</h2>
+                    <p>Listado de distribuciones registradas en el sistema.</p>
+                </div>
+
+                <button id="btnActualizar">
+                    Actualizar
+                </button>
+            </div>
+
+            <div id="tablaDistribuciones">
+                <p>No hay distribuciones registradas.</p>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<div class="toast" id="toast">
+    <span>✓</span>
+    <div id="toastMensaje">Distribución registrada correctamente</div>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+    cargarSidebar('distribucion');
+</script>
+<script src="distribucion.js?v=20260605"></script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: Arial, sans-serif;
+
+    background: #f5f5f5;
+
+    height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* CONTENEDOR PRINCIPAL */
+
+.contenedor-login{
+    width: 900px;
+    height: 520px;
+
+    background: white;
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    display: flex;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* PANEL IZQUIERDO */
+
+.panel-formulario{
+    width: 50%;
+
+    background: #ffffff;
+
+    padding: 70px 55px;
+}
+
+.panel-formulario h1{
+    text-align: center;
+
+    margin-bottom: 55px;
+
+    font-size: 28px;
+
+    text-decoration: underline;
+}
+
+/* INPUTS */
+
+.input-box{
+    width: 100%;
+    height: 65px;
+
+    background: white;
+
+    border-left: 5px solid #0057ff;
+
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 18px;
+
+    margin-bottom: 28px;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+}
+
+.icono{
+    margin-right: 15px;
+
+    font-size: 22px;
+
+    color: #666;
+}
+
+.input-box input{
+    width: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    font-size: 16px;
+
+    color: #333;
+}
+
+/* OPCIONES */
+
+.opciones{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-top: 10px;
+
+    font-size: 15px;
+}
+
+.opciones a{
+    text-decoration: none;
+
+    color: #0057ff;
+}
+
+/* BOTON LOGIN */
+
+.btn-login{
+    width: 190px;
+    height: 50px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #0057ff;
+
+    color: white;
+
+    font-size: 18px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    display: block;
+
+    margin: 55px auto 0;
+
+    transition: 0.3s;
+}
+
+.btn-login:hover{
+    background: #0041c4;
+}
+
+/* PANEL DERECHO */
+
+.panel-info{
+    width: 50%;
+
+    background: linear-gradient(
+            135deg,
+            #0057ff,
+            #0078ff
+    );
+
+    color: white;
+
+    padding: 40px;
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+/* EFECTOS DECORATIVOS */
+
+.panel-info::before{
+    content: '';
+
+    width: 320px;
+    height: 320px;
+
+    background: rgba(255,255,255,0.08);
+
+    border-radius: 50%;
+
+    position: absolute;
+
+    top: -120px;
+    right: -70px;
+}
+
+.panel-info::after{
+    content: '';
+
+    width: 320px;
+    height: 320px;
+
+    background: rgba(255,255,255,0.08);
+
+    border-radius: 50%;
+
+    position: absolute;
+
+    bottom: -140px;
+    left: -90px;
+}
+
+/* LOGO */
+
+.logo-sistema{
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.logo{
+    font-size: 34px;
+}
+
+.logo-sistema h2{
+    font-size: 20px;
+}
+
+.logo-sistema p{
+    font-size: 15px;
+
+    font-weight: bold;
+}
+
+/* TEXTO BIENVENIDA */
+
+.texto-bienvenida{
+    text-align: center;
+
+    margin-top: 150px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.texto-bienvenida h1{
+    font-size: 42px;
+
+    margin-bottom: 18px;
+}
+
+.texto-bienvenida p{
+    font-size: 20px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width: 1200px){
+
+    body{
+        padding: 15px;
+    }
+
+    .panel-formulario{
+        padding: 45px 25px;
+    }
+
+    .panel-formulario h1{
+        font-size: 24px;
+
+        margin-bottom: 40px;
+    }
+
+    .input-box{
+        height: 58px;
+
+        padding: 0 14px;
+    }
+
+    .icono{
+        font-size: 18px;
+    }
+
+    .input-box input{
+        font-size: 14px;
+    }
+
+    .opciones{
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 12px;
+    }
+
+    .btn-login{
+        width: 100%;
+
+        height: 52px;
+
+        font-size: 16px;
+    }
+
+    .texto-bienvenida{
+        margin-top: 60px;
+
+        margin-bottom: 40px;
+    }
+
+    .texto-bienvenida h1{
+        font-size: 30px;
+    }
+
+    .texto-bienvenida p{
+        font-size: 16px;
+    }
+
+    .panel-info::before,
+    .panel-info::after{
+        display: none;
+    }
+}

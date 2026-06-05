@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanques - Control de Agua</title>
+
+    <link rel="stylesheet" href="tanques.css?v=20260605">
+    <link rel="stylesheet" href="sidebar.css?v=20260605">
+    <link rel="stylesheet" href="responsive.css?v=20260605">
+
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+
+        <header class="header">
+
+            <div>
+                <h1>Tanques</h1>
+                <p>Registro y monitoreo del nivel de agua almacenada.</p>
+            </div>
+
+            <button class="save-btn" id="btnGuardarSuperior">
+                Guardar lectura
+            </button>
+
+        </header>
+
+        <section class="stats">
+
+            <div class="stat-card">
+                <div class="stat-icon">💧</div>
+
+                <div>
+                    <p>Nivel actual</p>
+                    <h2 id="nivelActual">0%</h2>
+                    <span>Última lectura registrada</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">🛢</div>
+
+                <div>
+                    <p>Litros disponibles</p>
+                    <h2 id="litrosDisponibles">0</h2>
+                    <span>Volumen calculado</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon purple">📋</div>
+
+                <div>
+                    <p>Lecturas</p>
+                    <h2 id="totalLecturas">0</h2>
+                    <span>Registros guardados</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon yellow">⚠</div>
+
+                <div>
+                    <p>Estado</p>
+                    <h2 id="estadoActual">Sin datos</h2>
+                    <span>Monitoreo del tanque</span>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="content-grid">
+
+            <div class="form-card">
+
+                <div class="card-header">
+                    <h2>Registrar lectura del tanque</h2>
+                    <p>Ingrese el porcentaje actual y la capacidad del tanque.</p>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="input-group">
+                        <label>Nombre del tanque</label>
+                        <input type="text" id="tanque" placeholder="Ejemplo: Tanque principal">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Sensor o método de medición</label>
+                        <input type="text" id="sensor" placeholder="Ejemplo: Medición manual">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Nivel actual (%)</label>
+                        <input type="number" id="nivelPorcentaje" min="0" max="100" placeholder="Ejemplo: 75">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Capacidad del tanque (litros)</label>
+                        <input type="number" id="capacidadLitros" min="1" placeholder="Ejemplo: 10000">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Volumen calculado</label>
+                        <input type="text" id="volumenCalculado" readonly value="0 litros">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Fecha y hora</label>
+                        <input type="datetime-local" id="fecha">
+                    </div>
+
+                    <div class="input-group full">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones" placeholder="Ingrese observaciones de la lectura"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="buttons">
+
+                    <button class="btn-clear" id="btnLimpiar">
+                        Limpiar
+                    </button>
+
+                    <button class="btn-save" id="btnRegistrar">
+                        Registrar lectura
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="tank-card">
+
+                <h3>Visualización del tanque</h3>
+
+                <div class="tank-visual">
+
+                    <div class="tank-container">
+                        <div class="water-level" id="waterLevel"></div>
+
+                        <div class="tank-text">
+                            <strong id="porcentajeVisual">0%</strong>
+                            <span id="estadoVisual">Sin datos</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="alert-box" id="alertaTanque">
+                    <strong>Sin lectura</strong>
+                    <p>Registre una lectura para visualizar el estado del tanque.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="tabla-card">
+
+            <div class="tabla-header">
+                <div>
+                    <h2>Historial de lecturas</h2>
+                    <p>Listado de registros del nivel del tanque.</p>
+                </div>
+
+                <button id="btnActualizar">
+                    Actualizar
+                </button>
+            </div>
+
+            <div id="tablaLecturas">
+                <p>No hay lecturas registradas.</p>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<div class="toast" id="toast">
+    <span>✓</span>
+    <div id="toastMensaje">Lectura registrada correctamente</div>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+    cargarSidebar('tanques');
+</script>
+<script src="tanques.js?v=20260605"></script>
+</body>
+</html>

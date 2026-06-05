@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - Control Agua</title>
+
+ <link rel="stylesheet" href="sidebar.css?v=20260605">
+<link rel="stylesheet" href="configuracion.css?v=20260605">
+<link rel="stylesheet" href="responsive.css?v=20260605">
+
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+
+        <header class="header">
+            <div>
+                <h1>Configuración</h1>
+                <p>Administra los ajustes generales del sistema de gestión de agua.</p>
+            </div>
+
+            <button class="btn-primary" id="btnGuardarSuperior">
+                Guardar cambios
+            </button>
+        </header>
+
+        <section class="config-layout">
+
+            <aside class="config-menu">
+
+                <button class="config-tab active" data-tab="general">
+                    ⚙ General
+                </button>
+
+                <button class="config-tab" data-tab="notificaciones">
+                    🔔 Notificaciones
+                </button>
+
+                <button class="config-tab" data-tab="tanques">
+                    💧 Tanques
+                </button>
+
+                <button class="config-tab" data-tab="distribucion">
+                    📊 Distribución
+                </button>
+
+                <button class="config-tab" data-tab="seguridad">
+                    🔒 Seguridad
+                </button>
+
+                <button class="config-tab" data-tab="usuarios">
+                    👥 Usuarios
+                </button>
+
+                <button class="config-tab" data-tab="respaldo">
+                    💾 Respaldo
+                </button>
+
+            </aside>
+
+            <section class="config-content">
+
+                <!-- GENERAL -->
+                <div class="config-section active" id="section-general">
+
+                    <div class="section-header">
+                        <span class="circle-number">1</span>
+                        <div>
+                            <h2>Configuración General</h2>
+                            <p>Ajusta las preferencias y parámetros principales del sistema.</p>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="config-card">
+
+                            <h3>Configuración general</h3>
+                            <p class="sub">Ajusta las preferencias principales del sistema.</p>
+
+                            <div class="form-grid">
+
+                                <div class="input-group">
+                                    <label>Nombre de la comunidad</label>
+                                    <input type="text" id="nombreComunidad" placeholder="Ejemplo: San Miguel">
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Modo de conectividad</label>
+                                    <select id="modoConectividad">
+                                        <option value="">Seleccione una opción</option>
+                                        <option value="Local">Local</option>
+                                        <option value="Limitada e intermitente">Limitada e intermitente</option>
+                                        <option value="En línea">En línea</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Total de familias esperado</label>
+                                    <input type="number" id="totalFamiliasConfig" placeholder="Ejemplo: 120">
+                                </div>
+
+                                <div class="switch-row">
+                                    <div>
+                                        <strong>Alertas de nivel crítico</strong>
+                                        <p>Enviar alerta cuando el tanque tenga bajo nivel.</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="alertasNivelCritico">
+                                        <span></span>
+                                    </label>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Fuente principal de agua</label>
+                                    <select id="fuenteAgua">
+                                        <option value="">Seleccione una fuente</option>
+                                        <option value="Pozo profundo">Pozo profundo</option>
+                                        <option value="Nacimiento">Nacimiento</option>
+                                        <option value="Tanque municipal">Tanque municipal</option>
+                                        <option value="Río o quebrada">Río o quebrada</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                </div>
+
+                                <div class="switch-row">
+                                    <div>
+                                        <strong>Registro de incidencias</strong>
+                                        <p>Permitir reportes de fugas, fallas o falta de agua.</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="registroIncidencias">
+                                        <span></span>
+                                    </label>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Distribución por sectores</label>
+                                    <select id="distribucionSectores">
+                                        <option value="true">Activado</option>
+                                        <option value="false">Desactivado</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-icon">ℹ</div>
+                            <h3>Información</h3>
+                            <p>Estos ajustes afectan el funcionamiento general del sistema. Asegúrate de guardar los cambios realizados.</p>
+                            <div class="big-icon">⚙️</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- NOTIFICACIONES -->
+                <div class="config-section" id="section-notificaciones">
+
+                    <div class="section-header">
+                        <span class="circle-number">2</span>
+                        <div>
+                            <h2>Configuración de Notificaciones</h2>
+                            <p>Define cómo y cuándo se enviarán las notificaciones y alertas.</p>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="config-card">
+
+                            <h3>Configuración de notificaciones</h3>
+                            <p class="sub">Personaliza los medios y eventos para recibir notificaciones.</p>
+
+                            <div class="switch-row full">
+                                <div>
+                                    <strong>Habilitar notificaciones</strong>
+                                    <p>Activa o desactiva todas las notificaciones del sistema.</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="habilitarNotificaciones">
+                                    <span></span>
+                                </label>
+                            </div>
+
+                            <div class="two-columns">
+
+                                <div>
+                                    <h4>Métodos de notificación</h4>
+
+                                    <label class="check-line">
+                                        <input type="checkbox" id="usarCorreo">
+                                        Correo electrónico
+                                    </label>
+                                    <input type="email" id="correoNotificacion" placeholder="admin@gmail.com">
+
+                                    <label class="check-line">
+                                        <input type="checkbox" id="usarSMS">
+                                        SMS
+                                    </label>
+                                    <input type="text" id="smsNotificacion" placeholder="502 1234-5678">
+
+                                    <label class="check-line">
+                                        <input type="checkbox" id="notificacionesSistema">
+                                        Notificaciones en el sistema
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <h4>Eventos para notificar</h4>
+
+                                    <label class="check-line">
+                                        <input type="checkbox" id="eventoNivelCritico">
+                                        Nivel crítico en tanques
+                                    </label>
+
+                                    <label class="check-line">
+                                        <input type="checkbox" id="eventoFugas">
+                                        Fugas o incidencias
+                                    </label>
+
+                                    <label class="check-line">
+                                        <input type="checkbox" id="eventoDistribucion">
+                                        Distribución de agua
+                                    </label>
+
+                                    <label class="check-line">
+                                        <input type="checkbox" id="eventoMantenimiento">
+                                        Mantenimiento programado
+                                    </label>
+                                </div>
+
+                            </div>
+
+                            <div class="form-grid bottom-grid">
+
+                                <div class="input-group">
+                                    <label>Horario de notificaciones</label>
+                                    <select id="horarioNotificaciones">
+                                        <option>Todos los días</option>
+                                        <option>Lunes a viernes</option>
+                                        <option>Fines de semana</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Desde</label>
+                                    <input type="time" id="notificarDesde">
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Hasta</label>
+                                    <input type="time" id="notificarHasta">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-icon">ℹ</div>
+                            <h3>Información</h3>
+                            <p>Las notificaciones te ayudan a mantener el control en tiempo real del sistema.</p>
+                            <div class="big-icon">🔔</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TANQUES -->
+                <div class="config-section" id="section-tanques">
+
+                    <div class="section-header">
+                        <span class="circle-number">3</span>
+                        <div>
+                            <h2>Configuración de Tanques</h2>
+                            <p>Administra los parámetros relacionados con los tanques de almacenamiento.</p>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="config-card">
+
+                            <h3>Configuración de tanques</h3>
+                            <p class="sub">Define los valores y comportamientos para el monitoreo de tanques.</p>
+
+                            <div class="form-grid">
+
+                                <div class="input-group">
+                                    <label>Unidad de medida de volumen</label>
+                                    <select id="unidadVolumen">
+                                        <option>Litros (L)</option>
+                                        <option>Metros cúbicos (m³)</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Capacidad por defecto del tanque (L)</label>
+                                    <input type="number" id="capacidadDefectoTanque" placeholder="10000">
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Nivel crítico mínimo (%)</label>
+                                    <input type="number" id="nivelCriticoTanque" placeholder="20">
+                                    <small>Por debajo de este valor se genera alerta.</small>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Nivel óptimo (%)</label>
+                                    <input type="number" id="nivelOptimoTanque" placeholder="80">
+                                    <small>Nivel recomendado para operación.</small>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Intervalo de lectura del sensor</label>
+                                    <select id="intervaloLectura">
+                                        <option>5 minutos</option>
+                                        <option>10 minutos</option>
+                                        <option>15 minutos</option>
+                                        <option>30 minutos</option>
+                                        <option>1 hora</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-icon">ℹ</div>
+                            <h3>Información</h3>
+                            <p>Estos parámetros se aplicarán a todos los tanques registrados en el sistema.</p>
+                            <div class="big-icon">🚰</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- DISTRIBUCIÓN -->
+                <div class="config-section" id="section-distribucion">
+
+                    <div class="section-header">
+                        <span class="circle-number">4</span>
+                        <div>
+                            <h2>Configuración de Distribución</h2>
+                            <p>Define los parámetros de distribución de agua por sectores.</p>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="config-card">
+
+                            <h3>Configuración de distribución</h3>
+                            <p class="sub">Establece las reglas y parámetros para la distribución de agua.</p>
+
+                            <label>Días de distribución</label>
+                            <div class="days-grid">
+                                <label><input type="checkbox" value="Lunes" class="diaDistribucion"> Lunes</label>
+                                <label><input type="checkbox" value="Martes" class="diaDistribucion"> Martes</label>
+                                <label><input type="checkbox" value="Miércoles" class="diaDistribucion"> Miércoles</label>
+                                <label><input type="checkbox" value="Jueves" class="diaDistribucion"> Jueves</label>
+                                <label><input type="checkbox" value="Viernes" class="diaDistribucion"> Viernes</label>
+                                <label><input type="checkbox" value="Sábado" class="diaDistribucion"> Sábado</label>
+                                <label><input type="checkbox" value="Domingo" class="diaDistribucion"> Domingo</label>
+                            </div>
+
+                            <div class="form-grid">
+
+                                <div class="input-group">
+                                    <label>Método de distribución</label>
+                                    <select id="metodoDistribucion">
+                                        <option>Por turnos</option>
+                                        <option>Por prioridad</option>
+                                        <option>Manual</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Horario de inicio por defecto</label>
+                                    <input type="time" id="horaInicioDistribucion">
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Horario de fin por defecto</label>
+                                    <input type="time" id="horaFinDistribucion">
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Orden de distribución</label>
+                                    <select id="ordenDistribucion">
+                                        <option>Alfabético (A - Z)</option>
+                                        <option>Alfabético (Z - A)</option>
+                                        <option>Mayor demanda</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Duración mínima por sector (horas)</label>
+                                    <input type="number" id="duracionMinimaSector">
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Descanso entre sectores (minutos)</label>
+                                    <input type="number" id="descansoSectores">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-icon">ℹ</div>
+                            <h3>Información</h3>
+                            <p>Estos ajustes ayudan a organizar el suministro de agua de manera eficiente.</p>
+                            <div class="big-icon">🗓️</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- SEGURIDAD -->
+                <div class="config-section" id="section-seguridad">
+
+                    <div class="section-header">
+                        <span class="circle-number">5</span>
+                        <div>
+                            <h2>Configuración de Seguridad</h2>
+                            <p>Administra las opciones de seguridad del sistema.</p>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="config-card">
+
+                            <h3>Configuración de seguridad</h3>
+                            <p class="sub">Controla las políticas de seguridad y acceso al sistema.</p>
+
+                            <div class="form-grid">
+
+                                <div class="input-group">
+                                    <label>Tiempo de sesión expira en</label>
+                                    <select id="tiempoSesion">
+                                        <option>15 minutos</option>
+                                        <option>30 minutos</option>
+                                        <option>1 hora</option>
+                                        <option>2 horas</option>
+                                    </select>
+                                </div>
+
+                                <div class="switch-row">
+                                    <div>
+                                        <strong>Verificación en dos pasos</strong>
+                                        <p>Requiere código adicional para iniciar sesión.</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="verificacionDosPasos">
+                                        <span></span>
+                                    </label>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Contraseña mínima</label>
+                                    <input type="number" id="contrasenaMinima">
+                                    <small>Cantidad mínima de caracteres.</small>
+                                </div>
+
+                                <div class="switch-row">
+                                    <div>
+                                        <strong>Bloquear usuarios inactivos</strong>
+                                        <p>Desactiva usuarios sin actividad prolongada.</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="bloquearInactivos">
+                                        <span></span>
+                                    </label>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Intentos fallidos permitidos</label>
+                                    <input type="number" id="intentosFallidos">
+                                </div>
+
+                                <div class="switch-row">
+                                    <div>
+                                        <strong>Registro de actividad</strong>
+                                        <p>Guarda el historial de acciones de usuario.</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="registroActividad">
+                                        <span></span>
+                                    </label>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-icon">ℹ</div>
+                            <h3>Información</h3>
+                            <p>Estas opciones ayudan a proteger la información del sistema.</p>
+                            <div class="big-icon">🛡️</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- USUARIOS -->
+                <div class="config-section" id="section-usuarios">
+
+                    <div class="section-header">
+                        <span class="circle-number">6</span>
+                        <div>
+                            <h2>Configuración de Usuarios</h2>
+                            <p>Administra los roles y permisos de los usuarios del sistema.</p>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="config-card">
+
+                            <div class="card-top">
+                                <div>
+                                    <h3>Gestión de usuarios</h3>
+                                    <p class="sub">Define roles y permisos para cada tipo de usuario.</p>
+                                </div>
+                                <button class="mini-btn" id="btnAgregarRol">+ Agregar rol</button>
+                            </div>
+
+                            <div class="roles-list" id="rolesList"></div>
+
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-icon">ℹ</div>
+                            <h3>Información</h3>
+                            <p>Asigna permisos adecuados para mantener el control y seguridad.</p>
+                            <div class="big-icon">👥</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RESPALDO -->
+                <div class="config-section" id="section-respaldo">
+
+                    <div class="section-header">
+                        <span class="circle-number">7</span>
+                        <div>
+                            <h2>Configuración de Respaldo</h2>
+                            <p>Configura las opciones de respaldo y restauración de datos.</p>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="config-card">
+
+                            <h3>Configuración de respaldo</h3>
+                            <p class="sub">Programa y administra las copias de seguridad del sistema.</p>
+
+                            <div class="form-grid">
+
+                                <div class="input-group">
+                                    <label>Frecuencia de respaldo</label>
+                                    <select id="frecuenciaRespaldo">
+                                        <option>Diario</option>
+                                        <option>Semanal</option>
+                                        <option>Mensual</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Hora de respaldo</label>
+                                    <input type="time" id="horaRespaldo">
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Retener respaldos por</label>
+                                    <select id="retenerRespaldos">
+                                        <option>7 días</option>
+                                        <option>15 días</option>
+                                        <option>30 días</option>
+                                        <option>60 días</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>Destino del respaldo</label>
+                                    <select id="destinoRespaldo">
+                                        <option>Almacenamiento local</option>
+                                        <option>Almacenamiento en la nube</option>
+                                        <option>Disco externo</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group full">
+                                    <label>Cuenta o ubicación</label>
+                                    <input type="text" id="cuentaRespaldo" placeholder="Ejemplo: carpeta local o correo">
+                                </div>
+
+                            </div>
+
+                            <div class="buttons">
+                                <button class="btn-secondary" id="btnRespaldarAhora">
+                                    Respaldar ahora
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-icon">ℹ</div>
+                            <h3>Información</h3>
+                            <p>Los respaldos aseguran que tu información pueda recuperarse si ocurre un problema.</p>
+                            <div class="big-icon">☁️</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="footer-actions">
+                    <span id="fechaActualizacion">Sin actualización</span>
+
+                    <div>
+                        <button class="btn-light" id="btnLimpiarConfiguracion">
+                            Limpiar
+                        </button>
+
+                        <button class="btn-primary" id="btnGuardarConfiguracion">
+                            Guardar cambios
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+</div>
+
+<div class="toast" id="toast">
+    <span>✓</span>
+    <p id="toastMensaje">Configuración guardada correctamente</p>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+    cargarSidebar('configuracion');
+</script>
+<script src="configuracion.js?v=20260605"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incidencias - Control de Agua</title>
+
+<link rel="stylesheet" href="incidencias.css?v=20260605">
+<link rel="stylesheet" href="sidebar.css?v=20260605">
+<link rel="stylesheet" href="responsive.css?v=20260605">
+
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+
+        <header class="header">
+
+            <div>
+                <h1>Incidencias</h1>
+                <p>Registro y control de problemas reportados en el servicio de agua.</p>
+            </div>
+
+            <button class="save-btn" id="btnGuardarSuperior">
+                Guardar incidencia
+            </button>
+
+        </header>
+
+        <section class="stats">
+
+            <div class="stat-card">
+                <div class="stat-icon">🔔</div>
+
+                <div>
+                    <p>Total incidencias</p>
+                    <h2 id="totalIncidencias">0</h2>
+                    <span>Registradas en el sistema</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon yellow">⚠</div>
+
+                <div>
+                    <p>Pendientes</p>
+                    <h2 id="incidenciasPendientes">0</h2>
+                    <span>Requieren seguimiento</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon purple">🔧</div>
+
+                <div>
+                    <p>En proceso</p>
+                    <h2 id="incidenciasProceso">0</h2>
+                    <span>Atendidas por mantenimiento</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">✅</div>
+
+                <div>
+                    <p>Resueltas</p>
+                    <h2 id="incidenciasResueltas">0</h2>
+                    <span>Finalizadas correctamente</span>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="content-grid">
+
+            <div class="form-card">
+
+                <div class="card-header">
+                    <h2>Registrar nueva incidencia</h2>
+                    <p>Complete la información del problema reportado.</p>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="input-group">
+                        <label>Nombre del responsable</label>
+                        <input type="text" id="responsable" placeholder="Ingrese el nombre del responsable">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Sector</label>
+                        <select id="sector">
+                            <option value="">Seleccione un sector</option>
+                            <option value="Sector A">Sector A</option>
+                            <option value="Sector B">Sector B</option>
+                            <option value="Sector C">Sector C</option>
+                            <option value="Sector D">Sector D</option>
+                            <option value="Sector E">Sector E</option>
+                            <option value="Sector F">Sector F</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Tipo de incidencia</label>
+                        <select id="tipo">
+                            <option value="">Seleccione una incidencia</option>
+                            <option value="Fuga de agua">Fuga de agua</option>
+                            <option value="Falta de agua">Falta de agua</option>
+                            <option value="Presión baja">Presión baja</option>
+                            <option value="Tubería dañada">Tubería dañada</option>
+                            <option value="Tanque vacío">Tanque vacío</option>
+                            <option value="Daño en infraestructura">Daño en infraestructura</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Prioridad</label>
+                        <select id="prioridad">
+                            <option value="Baja">Baja</option>
+                            <option value="Media" selected>Media</option>
+                            <option value="Alta">Alta</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Fecha</label>
+                        <input type="date" id="fecha">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Estado</label>
+                        <select id="estado">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En proceso">En proceso</option>
+                            <option value="Resuelta">Resuelta</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group full">
+                        <label>Descripción</label>
+                        <textarea id="descripcion" placeholder="Ingrese una descripción clara de la incidencia"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="buttons">
+
+                    <button class="btn-clear" id="btnLimpiar">
+                        Limpiar
+                    </button>
+
+                    <button class="btn-save" id="btnRegistrar">
+                        Registrar incidencia
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="help-card">
+
+                <h3>Información del módulo</h3>
+
+                <div class="help-item">
+                    <strong>Fuga de agua</strong>
+                    <p>Reporta problemas por escape de agua en tuberías o conexiones.</p>
+                </div>
+
+                <div class="help-item">
+                    <strong>Falta de agua</strong>
+                    <p>Registra interrupciones del servicio en un sector específico.</p>
+                </div>
+
+                <div class="help-item">
+                    <strong>Prioridad</strong>
+                    <p>Permite clasificar el nivel de urgencia para atender el problema.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="tabla-card">
+
+            <div class="tabla-header">
+                <div>
+                    <h2>Incidencias recientes</h2>
+                    <p>Listado de incidencias registradas en el sistema.</p>
+                </div>
+
+                <button id="btnActualizar">
+                    Actualizar
+                </button>
+            </div>
+
+            <div id="tablaIncidencias">
+                <p>No hay incidencias registradas.</p>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<div class="toast" id="toast">
+    <span>✓</span>
+    <div id="toastMensaje">Incidencia registrada correctamente</div>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+    cargarSidebar('incidencias');
+</script>
+<script src="incidencias.js?v=20260605"></script>
+</body>
+</html>

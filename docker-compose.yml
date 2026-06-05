@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    container_name: sistema-agua-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: "postgresql://neondb_owner:npg_O0n8pESzWtAm@ep-spring-rain-ap502kj9-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+      JWT_SECRET: "controlagua2026"

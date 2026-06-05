@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Control de Agua</title>
+
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+<div class="contenedor-login">
+
+    <!-- PANEL IZQUIERDO -->
+    <div class="panel-formulario">
+
+        <h1>Login</h1>
+
+        <!-- INPUT USUARIO -->
+        <div class="input-box">
+
+            <span class="icono">
+                ✉
+            </span>
+
+            <input
+                    type="text"
+                    id="usuario"
+                    placeholder="Ingrese su usuario o email"
+            >
+
+        </div>
+
+        <!-- INPUT PASSWORD -->
+        <div class="input-box">
+
+            <span class="icono">
+                🔑
+            </span>
+
+            <input
+                    type="password"
+                    id="password"
+                    placeholder="Ingrese su contraseña"
+            >
+
+        </div>
+
+        <!-- OPCIONES -->
+        <div class="opciones">
+
+            <label>
+                <input type="checkbox">
+                Recordarme
+            </label>
+
+            <a href="#">
+                ¿Olvidó su contraseña?
+            </a>
+
+        </div>
+
+        <!-- BOTON -->
+        <button class="btn-login" id="btnLogin">
+            LOG IN
+        </button>
+
+    </div>
+
+    <!-- PANEL DERECHO -->
+    <div class="panel-info">
+
+        <div class="logo-sistema">
+
+            <div class="logo">
+                ⬡
+            </div>
+
+            <div>
+                <h2>Control de Agua</h2>
+                <p>Sistema de Gestión</p>
+            </div>
+
+        </div>
+
+        <div class="texto-bienvenida">
+
+            <h1>¡BIENVENIDO!</h1>
+
+            <p>
+                Ingrese sus datos para acceder al sistema
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="login.js"></script>
+
+</body>
+</html>

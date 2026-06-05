@@ -1,0 +1,179 @@
+/* =========================
+   SIDEBAR GENERAL DEL SISTEMA
+========================= */
+
+.sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0b7cff 0%, #0057df 100%);
+    color: white;
+    padding: 24px 18px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    z-index: 20;
+}
+
+.sidebar-decoration {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+.sidebar-decoration.top {
+    width: 190px;
+    height: 190px;
+    top: -80px;
+    right: -70px;
+}
+
+.sidebar-decoration.bottom {
+    width: 180px;
+    height: 180px;
+    bottom: -95px;
+    left: -75px;
+}
+
+.brand {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 46px;
+}
+
+.brand-icon {
+    width: 31px;
+    height: 31px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-icon svg {
+    width: 31px;
+    height: 31px;
+}
+
+.brand h2 {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: white;
+    margin: 0;
+}
+
+.brand p {
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.95;
+    color: white;
+    margin: 0;
+}
+
+.menu {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.menu a {
+    color: white;
+    text-decoration: none;
+    padding: 14px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    font-size: 15px;
+    font-weight: 700;
+    opacity: 0.98;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.menu a:hover {
+    background: rgba(255, 255, 255, 0.14);
+    transform: translateX(2px);
+}
+
+.menu a.active {
+    background: rgba(255, 255, 255, 0.20);
+}
+
+.menu-icon {
+    width: 20px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+}
+
+.logout {
+    position: absolute;
+    z-index: 2;
+    bottom: 24px;
+    left: 18px;
+    right: 18px;
+    color: white;
+    text-decoration: none;
+    padding: 14px 16px;
+    border-radius: 12px;
+    display: flex;
+    gap: 13px;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 700;
+    transition: background 0.2s ease;
+}
+
+.logout:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.main {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+}
+
+/* =========================
+   RESPONSIVE SIDEBAR
+========================= */
+
+@media (max-width: 800px) {
+    .sidebar {
+        width: 82px;
+        padding: 22px 12px;
+    }
+
+    .brand {
+        justify-content: center;
+        margin-bottom: 42px;
+    }
+
+    .brand div:last-child,
+    .menu span:not(.menu-icon),
+    .logout span:not(.menu-icon) {
+        display: none;
+    }
+
+    .menu a {
+        justify-content: center;
+        padding: 14px 10px;
+    }
+
+    .logout {
+        justify-content: center;
+        left: 12px;
+        right: 12px;
+    }
+
+    .main {
+        margin-left: 82px;
+        width: calc(100% - 82px);
+    }
+}

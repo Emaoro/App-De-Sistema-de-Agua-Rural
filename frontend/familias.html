@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Familias - Control Agua</title>
+
+    <link rel="stylesheet" href="sidebar.css?v=20260605">
+<link rel="stylesheet" href="familias.css?v=20260605">
+<link rel="stylesheet" href="responsive.css?v=20260605">
+
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+
+        <header class="header">
+            <div>
+                <h1>Familias</h1>
+                <p>Registro y administración de familias beneficiarias del servicio de agua.</p>
+            </div>
+
+            <button class="btn-primary" id="btnAbrirModalFamilia">
+                + Nueva familia
+            </button>
+        </header>
+
+        <!-- TARJETAS -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon purple">👥</div>
+                <div>
+                    <p>Total familias</p>
+                    <h2 id="totalFamilias">0</h2>
+                    <span>Registradas en el sistema</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">✅</div>
+                <div>
+                    <p>Familias activas</p>
+                    <h2 id="familiasActivas">0</h2>
+                    <span>Con servicio activo</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon yellow">Ⅱ</div>
+                <div>
+                    <p>Suspendidas</p>
+                    <h2 id="familiasSuspendidas">0</h2>
+                    <span>Servicio detenido</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon violet">▦</div>
+                <div>
+                    <p>Sectores</p>
+                    <h2>6</h2>
+                    <span>Sector A al F</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- CONTENIDO -->
+        <section class="content-grid">
+
+            <div class="table-card">
+
+                <div class="table-header">
+                    <div>
+                        <h2>Familias registradas</h2>
+                        <p>Listado de familias beneficiarias del servicio.</p>
+                    </div>
+
+                    <input type="text" id="buscarFamilia" placeholder="Buscar familia...">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Jefe de familia</th>
+                                <th>DPI</th>
+                                <th>Teléfono</th>
+                                <th>Sector</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="tablaFamilias">
+                            <tr>
+                                <td colspan="8" class="empty-cell">
+                                    No hay familias registradas.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <aside class="info-card">
+                <h2>Información</h2>
+
+                <div class="info-item">
+                    <h3>Sector</h3>
+                    <p>Permite organizar a cada familia dentro de los sectores A, B, C, D, E y F.</p>
+                </div>
+
+                <div class="info-item">
+                    <h3>Estado</h3>
+                    <p>Indica si la familia cuenta con servicio activo o si tiene alguna restricción.</p>
+                </div>
+
+                <div class="info-item">
+                    <h3>Registro</h3>
+                    <p>Los datos se guardan para reportes, incidencias y distribución.</p>
+                </div>
+            </aside>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- MODAL REGISTRAR FAMILIA -->
+<div class="modal-overlay" id="modalFamilia">
+
+    <div class="modal">
+
+        <div class="modal-header">
+            <div class="modal-title">
+                <div class="modal-icon">👥</div>
+                <div>
+                    <h2>Registrar nueva familia</h2>
+                    <p>Complete la información de la familia.</p>
+                </div>
+            </div>
+
+            <button class="btn-close" id="btnCerrarModalFamilia">
+                ×
+            </button>
+        </div>
+
+        <form id="formFamilia">
+
+            <div class="form-grid">
+
+                <div class="input-group">
+                    <label>Nombre del jefe de familia <span>*</span></label>
+                    <input type="text" id="nombre_jefe" placeholder="Ejemplo: María Elena Rodríguez" required>
+                </div>
+
+                <div class="input-group">
+                    <label>DPI <span>*</span></label>
+                    <input type="text" id="dpi" placeholder="Ejemplo: 2048573620101" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="telefono" placeholder="Ejemplo: 32145678">
+                </div>
+
+                <div class="input-group">
+                    <label>Correo electrónico</label>
+                    <input type="email" id="correo" placeholder="Ejemplo: correo@gmail.com">
+                </div>
+
+                <div class="input-group">
+                    <label>Sector</label>
+                    <select id="sector">
+                        <option value="">Seleccione un sector</option>
+                        <option value="Sector A">Sector A</option>
+                        <option value="Sector B">Sector B</option>
+                        <option value="Sector C">Sector C</option>
+                        <option value="Sector D">Sector D</option>
+                        <option value="Sector E">Sector E</option>
+                        <option value="Sector F">Sector F</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Estado</label>
+                    <select id="estado">
+                        <option value="Activa">Activa</option>
+                        <option value="Suspendida">Suspendida</option>
+                    </select>
+                </div>
+
+                <div class="input-group full">
+                    <label>Dirección</label>
+                    <textarea id="direccion" placeholder="Ingrese la dirección de la familia"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>Fecha de registro</label>
+                    <input type="date" id="fecha_registro">
+                </div>
+
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-light" id="btnCancelarFamilia">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn-primary">
+                    💾 Guardar familia
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div class="toast" id="toast">
+    <span>✓</span>
+    <p id="toastMensaje">Familia registrada correctamente</p>
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+    cargarSidebar('familias');
+</script>
+<script src="familias.js?v=20260605"></script>
+
+</body>
+</html>

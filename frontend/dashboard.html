@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Control Agua</title>
+
+<link rel="stylesheet" href="sidebar.css?v=20260605">
+<link rel="stylesheet" href="dashboard.css?v=20260605">
+<link rel="stylesheet" href="responsive.css?v=20260605">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main">
+
+        <header class="header">
+            <div>
+                <h1>Dashboard Principal</h1>
+                <p>Sistema de control y gestión de agua rural</p>
+            </div>
+
+            <div class="fecha-dashboard">
+                📅 <span id="fechaActual">Cargando fecha...</span>
+            </div>
+        </header>
+
+        <!-- TARJETAS SUPERIORES -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon water">💧</div>
+
+                <div>
+                    <p>Consumo total</p>
+                    <h2><span id="consumoTotal">0</span> L</h2>
+                    <small>Registrado en distribución</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon pressure">📈</div>
+
+                <div>
+                    <p>Presión actual</p>
+                    <h2><span id="presionActual">2.4</span> bar</h2>
+                    <small>Valor de referencia</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon flow">🔄</div>
+
+                <div>
+                    <p>Flujo promedio</p>
+                    <h2><span id="flujoPromedio">0</span> L</h2>
+                    <small>Promedio por distribución</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon success">✅</div>
+
+                <div>
+                    <p>Eficiencia</p>
+                    <h2><span id="eficiencia">0</span>%</h2>
+                    <small>Familias atendidas</small>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <section class="dashboard-grid">
+
+            <!-- CONSUMO SEMANAL -->
+            <div class="panel panel-large">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Consumo semanal</h2>
+                        <p>Litros distribuidos durante los últimos días</p>
+                    </div>
+
+                    <button id="btnActualizarDashboard">Actualizar</button>
+                </div>
+
+                <div class="chart-box" id="graficaConsumo">
+                    <div class="empty-chart">
+                        No hay datos de distribución registrados
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ALERTAS -->
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Alertas recientes</h2>
+                        <p>Últimas incidencias registradas</p>
+                    </div>
+
+                    <a href="incidencias.html">Ver todas</a>
+                </div>
+
+                <div class="alert-list" id="listaAlertas">
+                    <div class="empty-box">
+                        No hay alertas registradas
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SECTORES -->
+            <div class="panel sector-panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Gestión de sectores</h2>
+                    </div>
+
+                    <a href="sectores.html">Ver</a>
+                </div>
+
+                <div class="sector-card active">
+                    <div class="sector-icon">👥</div>
+
+                    <div>
+                        <h3 id="sectoresActivos">6</h3>
+                        <p>Activos</p>
+                    </div>
+                </div>
+
+                <div class="sector-card maintenance">
+                    <div class="sector-icon">🔧</div>
+
+                    <div>
+                        <h3 id="sectoresMantenimiento">0</h3>
+                        <p>En mantenimiento</p>
+                    </div>
+                </div>
+
+                <div class="sector-card inactive">
+                    <div class="sector-icon">⊗</div>
+
+                    <div>
+                        <h3 id="sectoresInactivos">0</h3>
+                        <p>Inactivos</p>
+                    </div>
+                </div>
+
+                <a class="sector-link" href="sectores.html">
+                    Ver todos los sectores →
+                </a>
+
+            </div>
+
+            <!-- MANTENIMIENTO -->
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Mantenimiento Programado</h2>
+                        <p>Actividades pendientes del sistema</p>
+                    </div>
+
+                    <a href="configuracion.html">Ver todos</a>
+                </div>
+
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>Actividad</th>
+                            <th>Sector / Equipo</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Limpieza de tanque</td>
+                            <td>Tanque principal</td>
+                            <td>
+                                <span class="badge pending">Programado</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Revisión de válvulas</td>
+                            <td>Sectores A-F</td>
+                            <td>
+                                <span class="badge info">Pendiente</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+            <!-- REPORTES -->
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Reportes</h2>
+                        <p>Genera reportes del sistema</p>
+                    </div>
+
+                    <a href="reportes.html">Ver todos</a>
+                </div>
+
+                <div class="report-form">
+
+                    <label for="tipoReporteDashboard">Tipo de reporte</label>
+                    <select id="tipoReporteDashboard">
+                        <option value="general">Reporte general</option>
+                        <option value="familias">Familias</option>
+                        <option value="incidencias">Incidencias</option>
+                        <option value="tanques">Tanques</option>
+                        <option value="distribucion">Distribución</option>
+                    </select>
+
+                    <label for="periodoReporteDashboard">Periodo</label>
+                    <select id="periodoReporteDashboard">
+                        <option>Últimos 7 días</option>
+                        <option>Este mes</option>
+                        <option>Todo el registro</option>
+                    </select>
+
+                    <button id="btnIrReportes">
+                        📊 Generar reporte
+                    </button>
+
+                    <div class="note">
+                        ℹ Los reportes se generan desde el módulo Reportes y se guardan en PostgreSQL.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="sidebar.js"></script>
+<script>
+    cargarSidebar('inicio');
+</script>
+<script src="dashboard.js?v=20260605"></script>
+
+</body>
+</html>

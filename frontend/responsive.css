@@ -1,0 +1,489 @@
+/* =====================================================
+   RESPONSIVE GENERAL - CONTROL AGUA
+   Computadora, tablet y teléfono
+===================================================== */
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+img,
+svg,
+canvas {
+    max-width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 1100px) {
+    .main {
+        padding: 26px 24px;
+    }
+
+    .stats-grid,
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .dashboard-grid,
+    .content-grid,
+    .charts-grid,
+    .config-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    .panel,
+    .form-card,
+    .table-card,
+    .tabla-card,
+    .chart-card,
+    .config-card,
+    .info-card,
+    .help-card,
+    .tank-card {
+        width: 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .content-grid {
+        gap: 18px;
+    }
+
+    .table-container,
+    .tabla-card,
+    .report-table,
+    .mini-table {
+        overflow-x: auto;
+    }
+
+    .table-container table,
+    .tabla-card table,
+    .report-table,
+    .mini-table {
+        min-width: 760px;
+    }
+}
+
+/* =========================
+   TELÉFONO
+========================= */
+
+@media (max-width: 700px) {
+    body {
+        background: #f8fafc;
+    }
+
+    .dashboard {
+        display: block;
+        min-height: 100vh;
+    }
+
+    .main {
+        width: 100% !important;
+        margin-left: 0 !important;
+        padding: 82px 14px 24px !important;
+    }
+
+    .mobile-menu-btn {
+        display: flex !important;
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 1001;
+        width: 46px;
+        height: 46px;
+        border: none;
+        border-radius: 14px;
+        background: #0067ff;
+        color: white;
+        font-size: 24px;
+        font-weight: 800;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 22px rgba(0, 103, 255, 0.28);
+        cursor: pointer;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 998;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    .sidebar {
+        width: 265px !important;
+        min-height: 100vh;
+        height: 100vh;
+        padding: 24px 18px !important;
+        transform: translateX(-105%);
+        transition: transform 0.25s ease;
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .brand {
+        justify-content: flex-start !important;
+        margin-bottom: 34px !important;
+    }
+
+    .brand div:last-child,
+    .menu span:not(.menu-icon),
+    .logout span:not(.menu-icon) {
+        display: block !important;
+    }
+
+    .menu a,
+    .logout {
+        justify-content: flex-start !important;
+        padding: 13px 14px !important;
+    }
+
+    .logout {
+        position: relative !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        margin-top: 22px;
+    }
+
+    .header,
+    .report-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        font-size: 26px !important;
+        line-height: 1.15;
+    }
+
+    .header p {
+        font-size: 14px !important;
+    }
+
+    .fecha-dashboard,
+    .date-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .header button,
+    .btn-primary,
+    .save-btn,
+    .export-btn {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .stats-grid,
+    .stats {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+
+    .stat-card {
+        padding: 18px !important;
+        gap: 14px !important;
+    }
+
+    .stat-card h2 {
+        font-size: 24px !important;
+    }
+
+    .stat-icon {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 22px !important;
+    }
+
+    .dashboard-grid,
+    .content-grid,
+    .charts-grid,
+    .config-layout,
+    .two-columns,
+    .bottom-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+
+    .panel,
+    .form-card,
+    .table-card,
+    .tabla-card,
+    .chart-card,
+    .config-card,
+    .info-card,
+    .help-card,
+    .tank-card {
+        padding: 18px !important;
+        border-radius: 16px !important;
+    }
+
+    .panel-header,
+    .card-header,
+    .tabla-header,
+    .table-header,
+    .section-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px;
+    }
+
+    .panel-header h2,
+    .card-header h2,
+    .tabla-header h2,
+    .table-header h2 {
+        font-size: 20px !important;
+    }
+
+    .panel-header a,
+    .panel-header button,
+    .card-header button,
+    .tabla-header button,
+    .table-header button {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+
+    .input-group,
+    .form-group,
+    .input-group.full,
+    .form-group.full {
+        grid-column: auto !important;
+        width: 100%;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100% !important;
+        font-size: 15px !important;
+    }
+
+    textarea {
+        min-height: 95px;
+    }
+
+    .buttons,
+    .modal-actions,
+    .modal-footer {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .buttons button,
+    .modal-actions button,
+    .modal-footer button,
+    .btn-clear,
+    .btn-save,
+    .btn-light,
+    .btn-primary,
+    .btn-cancelar,
+    .btn-guardar {
+        width: 100% !important;
+    }
+
+    .table-container,
+    .tabla-card,
+    .tabla-scroll,
+    .report-table,
+    .mini-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-container table,
+    .tabla-card table,
+    .report-table,
+    .mini-table {
+        min-width: 720px;
+        font-size: 13px;
+    }
+
+    th,
+    td {
+        white-space: nowrap;
+    }
+
+    .modal-overlay {
+        padding: 14px !important;
+        align-items: flex-start !important;
+        overflow-y: auto;
+    }
+
+    .modal,
+    .modal-sector,
+    .modal-reporte {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-top: 20px;
+        border-radius: 18px !important;
+        max-height: none !important;
+    }
+
+    .modal-header {
+        gap: 12px;
+    }
+
+    .modal-title h2,
+    .modal-header h2 {
+        font-size: 20px !important;
+    }
+
+    .config-menu {
+        display: flex !important;
+        overflow-x: auto;
+        gap: 10px;
+        padding-bottom: 8px;
+    }
+
+    .config-tab {
+        min-width: max-content;
+        white-space: nowrap;
+    }
+
+    .chart-box {
+        height: 230px !important;
+        overflow-x: auto;
+    }
+
+    .chart-content {
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    .donut {
+        margin: 0 auto;
+    }
+
+    .tank-container {
+        max-width: 220px;
+        margin: 0 auto;
+    }
+
+    .toast {
+        left: 14px !important;
+        right: 14px !important;
+        bottom: 18px !important;
+        width: auto !important;
+    }
+}
+
+/* =========================
+   TELÉFONOS PEQUEÑOS
+========================= */
+
+@media (max-width: 420px) {
+    .main {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    .header h1 {
+        font-size: 23px !important;
+    }
+
+    .stat-card {
+        align-items: flex-start !important;
+    }
+
+    .stat-card h2 {
+        font-size: 22px !important;
+    }
+
+    .panel,
+    .form-card,
+    .table-card,
+    .tabla-card,
+    .chart-card {
+        padding: 15px !important;
+    }
+
+    .sidebar {
+        width: 245px !important;
+    }
+}
+
+/* =========================
+   LOGIN RESPONSIVE
+========================= */
+
+@media (max-width: 850px) {
+    .contenedor-login {
+        grid-template-columns: 1fr !important;
+        min-height: 100vh;
+    }
+
+    .panel-info {
+        display: none !important;
+    }
+
+    .panel-formulario {
+        width: 100%;
+        min-height: 100vh;
+        padding: 30px 22px !important;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel-formulario {
+        padding: 24px 18px !important;
+    }
+
+    .panel-formulario h1 {
+        font-size: 28px !important;
+    }
+
+    .input-box {
+        width: 100%;
+    }
+
+    .opciones {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+    }
+
+    .btn-login {
+        width: 100%;
+    }
+}
+
+/* Ocultar botón móvil en escritorio */
+.mobile-menu-btn {
+    display: none;
+}
