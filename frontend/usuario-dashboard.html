@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Usuario - Control Agua</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="usuario-dashboard.css">
+</head>
+<body>
+
+    <aside class="user-sidebar">
+
+        <div class="user-brand">
+            <div class="user-brand-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path 
+                        d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z"
+                        stroke="white"
+                        stroke-width="2"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </div>
+
+            <div>
+                <h2>Control Agua</h2>
+                <p>Sistema de Gestión</p>
+            </div>
+        </div>
+
+        <nav class="user-menu">
+            <button class="menu-item active" data-section="inicio">
+                <span>⌂</span>
+                Inicio
+            </button>
+
+            <button class="menu-item" data-section="informacion">
+                <span>👤</span>
+                Mi información
+            </button>
+
+            <button class="menu-item" data-section="distribucion">
+                <span>▣</span>
+                Distribución
+            </button>
+
+            <button class="menu-item" data-section="incidencias">
+                <span>⚠</span>
+                Incidencias
+            </button>
+
+            <button class="menu-item" data-section="notificaciones">
+                <span>🔔</span>
+                Notificaciones
+            </button>
+
+            <button class="menu-item" data-section="historial">
+                <span>▤</span>
+                Historial
+            </button>
+        </nav>
+
+        <button class="logout-user" id="btnCerrarSesionUsuario">
+            <span>↩</span>
+            Cerrar sesión
+        </button>
+
+    </aside>
+
+    <main class="user-main">
+
+        <header class="user-header">
+            <div>
+                <h1>Panel de Usuario</h1>
+                <p>Vista del sistema para familias y usuarios de la comunidad</p>
+            </div>
+
+            <div class="header-date">
+                <span>📅</span>
+                <span id="fechaActualUsuario"></span>
+            </div>
+        </header>
+
+        <!-- INICIO -->
+        <section class="user-section active-section" id="section-inicio">
+
+            <div class="welcome-user">
+                <div>
+                    <h2>Bienvenido, <span id="nombreBienvenida">Usuario invitado</span></h2>
+                    <p>Sector asignado: <strong id="sectorBienvenida">Sin sector</strong></p>
+                </div>
+            </div>
+
+            <div class="summary-grid">
+
+                <article class="summary-card">
+                    <h3>Estado del servicio</h3>
+                    <div class="status-circle">✓</div>
+                    <h2 class="status-active">Activo</h2>
+                    <p>Servicio disponible en tu sector.</p>
+                </article>
+
+                <article class="summary-card">
+                    <h3>Próxima distribución</h3>
+                    <div class="icon-box">📅</div>
+                    <h2>Jueves</h2>
+                    <p>08:00 a. m. - 11:00 a. m.</p>
+                </article>
+
+                <article class="summary-card">
+                    <h3>Nivel del tanque comunitario</h3>
+                    <div class="tank-box">
+                        <div class="tank-fill" id="tankFill"></div>
+                        <span id="tankPercent">65%</span>
+                    </div>
+                    <p>6,500 L de 10,000 L</p>
+                </article>
+
+            </div>
+
+            <div class="content-grid">
+
+                <article class="panel-card large-card">
+                    <div class="panel-title">
+                        <h3>Consumo en el sector</h3>
+                    </div>
+
+                    <div class="bar-chart" id="graficaUsuario">
+                        <div class="bar-item"><div class="bar" style="height: 90px;"></div><span>Lun</span></div>
+                        <div class="bar-item"><div class="bar" style="height: 110px;"></div><span>Mar</span></div>
+                        <div class="bar-item"><div class="bar" style="height: 130px;"></div><span>Mié</span></div>
+                        <div class="bar-item"><div class="bar" style="height: 150px;"></div><span>Jue</span></div>
+                        <div class="bar-item"><div class="bar" style="height: 180px;"></div><span>Vie</span></div>
+                        <div class="bar-item"><div class="bar" style="height: 160px;"></div><span>Sáb</span></div>
+                        <div class="bar-item"><div class="bar" style="height: 125px;"></div><span>Dom</span></div>
+                    </div>
+                </article>
+
+                <article class="panel-card">
+                    <div class="panel-title">
+                        <h3>Mis reportes</h3>
+                    </div>
+
+                    <div class="report-mini">
+                        <div><span class="green-dot"></span> <strong id="reportesEnviados">1</strong> Enviado</div>
+                        <div><span class="orange-dot"></span> <strong id="reportesPendientes">0</strong> Pendientes</div>
+                        <div><span class="blue-dot"></span> <strong id="reportesResueltos">1</strong> Resueltos</div>
+                    </div>
+                </article>
+
+            </div>
+
+            <article class="panel-card">
+                <div class="panel-title">
+                    <h3>Avisos recientes</h3>
+                    <button class="link-btn" data-section-target="notificaciones">Ver todas</button>
+                </div>
+
+                <div class="notification-list" id="avisosInicio">
+                    <div class="notice info">
+                        <span>ℹ</span>
+                        <div>
+                            <h4>Mantenimiento programado</h4>
+                            <p>Mantenimiento en tanque elevado. Horario: 08:00 a. m. a 11:00 a. m.</p>
+                        </div>
+                    </div>
+
+                    <div class="notice warning">
+                        <span>⚠</span>
+                        <div>
+                            <h4>Nivel bajo del tanque comunitario</h4>
+                            <p>Se recomienda utilizar el agua responsablemente.</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- MI INFORMACIÓN -->
+        <section class="user-section" id="section-informacion">
+
+            <div class="section-title">
+                <h2>Mi información</h2>
+                <p>Consulta tus datos personales registrados en el sistema.</p>
+            </div>
+
+            <div class="info-layout">
+
+                <article class="panel-card">
+                    <h3>Datos de la familia</h3>
+
+                    <div class="form-grid-user">
+                        <label>
+                            Jefe de familia
+                            <input type="text" id="infoNombre" readonly>
+                        </label>
+
+                        <label>
+                            DPI
+                            <input type="text" id="infoDpi" value="No registrado" readonly>
+                        </label>
+
+                        <label>
+                            Teléfono
+                            <input type="text" id="infoTelefono" value="No registrado" readonly>
+                        </label>
+
+                        <label>
+                            Correo electrónico
+                            <input type="email" id="infoCorreo" readonly>
+                        </label>
+
+                        <label>
+                            Sector
+                            <input type="text" id="infoSector" value="Sector Centro" readonly>
+                        </label>
+
+                        <label>
+                            Dirección
+                            <textarea id="infoDireccion" readonly>No registrada</textarea>
+                        </label>
+
+                        <label>
+                            Estado del servicio
+                            <input type="text" value="Activo" readonly>
+                        </label>
+                    </div>
+                </article>
+
+                <article class="panel-card profile-card">
+                    <h3>Resumen de perfil</h3>
+
+                    <div class="avatar-user">👤</div>
+
+                    <h2 id="perfilNombre">Usuario invitado</h2>
+
+                    <span class="badge-active">Usuario activo</span>
+
+                    <p>Miembro desde</p>
+                    <strong>2026</strong>
+
+                    <div class="info-alert">
+                        Mantén tu información actualizada para recibir notificaciones importantes.
+                    </div>
+                </article>
+
+            </div>
+
+        </section>
+
+        <!-- DISTRIBUCIÓN -->
+        <section class="user-section" id="section-distribucion">
+
+            <div class="section-title">
+                <h2>Horario de distribución</h2>
+                <p>Consulta el calendario de distribución de agua por sector.</p>
+            </div>
+
+            <article class="panel-card">
+
+                <div class="filter-row">
+                    <label>
+                        Sector
+                        <select id="sectorFiltro">
+                            <option>Sector Centro</option>
+                            <option>Sector Norte</option>
+                            <option>Sector Sur</option>
+                            <option>Sector Oriente</option>
+                            <option>Sector Occidente</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Mes
+                        <select>
+                            <option>Junio 2026</option>
+                            <option>Julio 2026</option>
+                        </select>
+                    </label>
+
+                    <button class="primary-small">Imprimir</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Día</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Estado</th>
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>06/06/2026</td>
+                                <td>Jueves</td>
+                                <td>08:00 a. m.</td>
+                                <td>11:00 a. m.</td>
+                                <td><span class="badge-blue">Programado</span></td>
+                                <td>Distribución normal</td>
+                            </tr>
+                            <tr>
+                                <td>13/06/2026</td>
+                                <td>Jueves</td>
+                                <td>08:00 a. m.</td>
+                                <td>11:00 a. m.</td>
+                                <td><span class="badge-blue">Programado</span></td>
+                                <td>Distribución normal</td>
+                            </tr>
+                            <tr>
+                                <td>20/06/2026</td>
+                                <td>Jueves</td>
+                                <td>08:00 a. m.</td>
+                                <td>11:00 a. m.</td>
+                                <td><span class="badge-blue">Programado</span></td>
+                                <td>Distribución normal</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-message">
+                    ℹ Los horarios pueden variar por mantenimiento o emergencias.
+                </div>
+
+            </article>
+
+        </section>
+
+        <!-- INCIDENCIAS -->
+        <section class="user-section" id="section-incidencias">
+
+            <div class="section-title">
+                <h2>Reportar incidencia</h2>
+                <p>Completa el formulario para reportar un problema.</p>
+            </div>
+
+            <div class="info-layout">
+
+                <article class="panel-card">
+                    <h3>Nueva incidencia</h3>
+
+                    <form id="formIncidenciaUsuario" class="form-grid-user">
+
+                        <label>
+                            Nombre completo
+                            <input type="text" id="incNombre" readonly>
+                        </label>
+
+                        <label>
+                            Sector
+                            <select id="incSector">
+                                <option>Sector Centro</option>
+                                <option>Sector Norte</option>
+                                <option>Sector Sur</option>
+                                <option>Sector Oriente</option>
+                                <option>Sector Occidente</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Tipo de incidencia
+                            <select id="incTipo">
+                                <option>Fuga de agua</option>
+                                <option>Falta de agua</option>
+                                <option>Baja presión</option>
+                                <option>Daño en tubería</option>
+                                <option>Otro</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Descripción
+                            <textarea id="incDescripcion" placeholder="Describe el problema observado" required></textarea>
+                        </label>
+
+                        <label>
+                            Fecha y hora
+                            <input type="datetime-local" id="incFecha">
+                        </label>
+
+                        <button type="submit" class="primary-btn">
+                            Enviar reporte
+                        </button>
+
+                    </form>
+                </article>
+
+                <article class="panel-card">
+                    <h3>Resumen de mis reportes</h3>
+
+                    <div class="stats-vertical">
+                        <div class="stat-box blue">
+                            <strong id="totalReportesUsuario">2</strong>
+                            <span>Reportes enviados</span>
+                        </div>
+
+                        <div class="stat-box orange">
+                            <strong>1</strong>
+                            <span>Pendientes</span>
+                        </div>
+
+                        <div class="stat-box green">
+                            <strong>1</strong>
+                            <span>Resueltos</span>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+
+        </section>
+
+        <!-- NOTIFICACIONES -->
+        <section class="user-section" id="section-notificaciones">
+
+            <div class="section-title">
+                <h2>Mis notificaciones</h2>
+                <p>Alertas y avisos de la comunidad.</p>
+            </div>
+
+            <article class="panel-card">
+
+                <div class="notification-list">
+                    <div class="notice danger">
+                        <span>⚠</span>
+                        <div>
+                            <h4>Nivel bajo del tanque comunitario</h4>
+                            <p>El nivel del tanque está al 65%. Ahorra agua y úsala responsablemente.</p>
+                        </div>
+                    </div>
+
+                    <div class="notice info">
+                        <span>ℹ</span>
+                        <div>
+                            <h4>Mantenimiento programado</h4>
+                            <p>Mantenimiento en tanque elevado. Horario: 08:00 a. m. a 11:00 a. m.</p>
+                        </div>
+                    </div>
+
+                    <div class="notice warning">
+                        <span>⚠</span>
+                        <div>
+                            <h4>Cambio en horario de distribución</h4>
+                            <p>La distribución podría iniciar 30 minutos antes por mantenimiento.</p>
+                        </div>
+                    </div>
+
+                    <div class="notice success">
+                        <span>✓</span>
+                        <div>
+                            <h4>Servicio restablecido</h4>
+                            <p>El servicio de agua ha sido restablecido en tu sector.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </article>
+
+        </section>
+
+        <!-- HISTORIAL -->
+        <section class="user-section" id="section-historial">
+
+            <div class="section-title">
+                <h2>Historial de servicio</h2>
+                <p>Consulta registros de distribuciones anteriores.</p>
+            </div>
+
+            <div class="summary-grid">
+                <article class="summary-card">
+                    <h3>Distribuciones este mes</h3>
+                    <h2>4</h2>
+                    <p>Junio 2026</p>
+                </article>
+
+                <article class="summary-card">
+                    <h3>Cumplimiento</h3>
+                    <h2 class="status-active">100%</h2>
+                    <p>Este mes</p>
+                </article>
+
+                <article class="summary-card">
+                    <h3>Última distribución</h3>
+                    <h2>06/06/2026</h2>
+                    <p>08:00 a. m. - 11:00 a. m.</p>
+                </article>
+            </div>
+
+            <article class="panel-card">
+                <h3>Historial de distribuciones</h3>
+
+                <div class="table-responsive">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Sector</th>
+                                <th>Estado</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>06/06/2026</td>
+                                <td>Sector Centro</td>
+                                <td><span class="badge-green">Completado</span></td>
+                                <td>Distribución normal</td>
+                            </tr>
+                            <tr>
+                                <td>30/05/2026</td>
+                                <td>Sector Centro</td>
+                                <td><span class="badge-green">Completado</span></td>
+                                <td>Distribución normal</td>
+                            </tr>
+                            <tr>
+                                <td>23/05/2026</td>
+                                <td>Sector Centro</td>
+                                <td><span class="badge-green">Completado</span></td>
+                                <td>Horario ajustado por mantenimiento</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-message">
+                    ℹ Los registros históricos están disponibles para consulta general.
+                </div>
+            </article>
+
+        </section>
+
+    </main>
+
+    <script src="usuario-dashboard.js?v=2026060505"></script>
+</body>
+</html>
